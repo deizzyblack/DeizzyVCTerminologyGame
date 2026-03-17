@@ -3,671 +3,758 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚀 Startup Yolculuğu - VC Terminoloji Oyunu</title>
+<title>Kim VC Milyoneri Olmak İster? - VC Terminoloji Oyunu</title>
 <style>
   /* ============================================
-     STARTUP YOLCULUĞU - VC TERMİNOLOJİ OYUNU
-     Tüm stiller bu <style> bloğu içindedir.
+     KİM VC MİLYONERİ OLMAK İSTER?
+     Klasik "Kim Milyoner Olmak İster" tarzı
+     VC Terminoloji Eğitim Oyunu
   ============================================ */
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; } to { opacity: 1; }
   }
-
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(60px); }
+    from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
-    20%, 40%, 60%, 80% { transform: translateX(6px); }
-  }
-
-  @keyframes elevatorMove {
-    0% { transform: translateY(0); }
-    30% { transform: translateY(-18px); }
-    60% { transform: translateY(-10px); }
-    100% { transform: translateY(0); }
-  }
-
-  @keyframes elevatorShake {
-    0%, 100% { transform: translateX(0) rotate(0deg); }
-    15% { transform: translateX(-5px) rotate(-1deg); }
-    30% { transform: translateX(5px) rotate(1deg); }
-    45% { transform: translateX(-4px) rotate(-0.5deg); }
-    60% { transform: translateX(4px) rotate(0.5deg); }
-    75% { transform: translateX(-2px) rotate(0deg); }
-  }
-
-  @keyframes pulseGlow {
-    0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); }
-    50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.6); }
-  }
-
-  @keyframes confetti {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(-200px) rotate(720deg); opacity: 0; }
-  }
-
-  @keyframes starPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.3); }
-  }
-
   @keyframes popIn {
     0% { transform: scale(0.5); opacity: 0; }
-    70% { transform: scale(1.1); }
+    70% { transform: scale(1.05); }
     100% { transform: scale(1); opacity: 1; }
   }
-
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  }
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 15px rgba(255, 165, 0, 0.3), inset 0 0 15px rgba(255,165,0,0.1); }
+    50% { box-shadow: 0 0 30px rgba(255, 165, 0, 0.6), inset 0 0 25px rgba(255,165,0,0.2); }
+  }
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
   }
-
-  @keyframes doorOpen {
-    0% { width: 45%; }
-    100% { width: 5%; }
+  @keyframes correctFlash {
+    0% { background: rgba(255,165,0,0.15); }
+    50% { background: rgba(0,200,80,0.4); }
+    100% { background: rgba(0,200,80,0.2); }
   }
-
-  @keyframes doorClose {
-    0% { width: 5%; }
-    100% { width: 45%; }
+  @keyframes wrongFlash {
+    0% { background: rgba(255,165,0,0.15); }
+    50% { background: rgba(220,50,50,0.4); }
+    100% { background: rgba(220,50,50,0.2); }
+  }
+  @keyframes logoSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes selectedPulse {
+    0%, 100% { background: rgba(255,165,0,0.3); }
+    50% { background: rgba(255,165,0,0.5); }
+  }
+  @keyframes timerTick {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
   }
 
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    background: radial-gradient(ellipse at center, #1a0a3e 0%, #0d0628 40%, #050216 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #e2e8f0;
-    overflow: hidden;
+    color: #e0d8f0;
+    overflow-x: hidden;
   }
 
-  .game-container {
-    width: 100%;
-    max-width: 800px;
-    padding: 20px;
-    position: relative;
-  }
-
-  /* ===== START SCREEN ===== */
-  .screen { display: none; animation: fadeIn 0.5s ease-out; }
+  /* ===== SCREENS ===== */
+  .screen { display: none; animation: fadeIn 0.6s ease-out; width: 100%; }
   .screen.active { display: block; }
 
+  /* ===== START SCREEN ===== */
   .start-screen {
     text-align: center;
-    padding: 40px 20px;
+    padding: 30px 20px;
+    max-width: 700px;
+    margin: 0 auto;
   }
 
-  .start-screen h1 {
-    font-size: 2.5em;
-    margin-bottom: 10px;
-    background: linear-gradient(90deg, #f59e0b, #ef4444, #8b5cf6);
+  .logo-container {
+    position: relative;
+    width: 200px; height: 200px;
+    margin: 0 auto 20px;
+  }
+
+  .logo-ring {
+    width: 200px; height: 200px;
+    border: 3px solid rgba(255, 165, 0, 0.5);
+    border-radius: 50%;
+    position: absolute;
+    top: 0; left: 0;
+    animation: logoSpin 20s linear infinite;
+    border-top-color: #ffa500;
+    border-right-color: transparent;
+  }
+
+  .logo-ring-inner {
+    width: 170px; height: 170px;
+    border: 2px solid rgba(255, 165, 0, 0.3);
+    border-radius: 50%;
+    position: absolute;
+    top: 15px; left: 15px;
+    animation: logoSpin 15s linear infinite reverse;
+    border-bottom-color: #ffd700;
+    border-left-color: transparent;
+  }
+
+  .logo-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .logo-center .title-vc {
+    font-size: 1.6em;
+    font-weight: 900;
+    color: #ffa500;
+    text-shadow: 0 0 20px rgba(255,165,0,0.5);
+    line-height: 1;
+  }
+
+  .logo-center .title-sub {
+    font-size: 0.65em;
+    color: #c0a0ff;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  .start-title {
+    font-size: 2em;
+    font-weight: 900;
+    margin-bottom: 8px;
+    background: linear-gradient(180deg, #ffd700, #ff8c00);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-shadow: none;
   }
 
-  .start-screen .subtitle {
-    font-size: 1.1em;
-    color: #94a3b8;
-    margin-bottom: 40px;
-  }
-
-  .elevator-preview {
-    font-size: 80px;
-    margin: 20px 0;
-    animation: float 3s ease-in-out infinite;
+  .start-subtitle {
+    font-size: 1em;
+    color: #a08cc0;
+    margin-bottom: 30px;
   }
 
   .start-btn {
-    padding: 18px 50px;
-    font-size: 1.3em;
+    padding: 16px 50px;
+    font-size: 1.2em;
     font-weight: bold;
-    border: none;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: white;
+    border: 2px solid #ffa500;
+    border-radius: 50px;
+    background: linear-gradient(180deg, rgba(255,165,0,0.2), rgba(255,140,0,0.1));
+    color: #ffd700;
     cursor: pointer;
     transition: all 0.3s;
-    animation: pulseGlow 2s infinite;
+    letter-spacing: 1px;
+    animation: pulseGlow 2.5s infinite;
   }
 
   .start-btn:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+    background: linear-gradient(180deg, rgba(255,165,0,0.4), rgba(255,140,0,0.2));
+    transform: scale(1.05);
   }
 
-  .instructions {
+  .rules-box {
     margin-top: 30px;
-    padding: 20px;
-    background: rgba(255,255,255,0.05);
+    padding: 20px 25px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,165,0,0.15);
     border-radius: 16px;
     text-align: left;
-    font-size: 0.95em;
-    line-height: 1.8;
-    color: #cbd5e1;
-  }
-
-  .instructions span { font-weight: bold; color: #a5b4fc; }
-
-  /* ===== GAME SCREEN ===== */
-  .game-screen { position: relative; }
-
-  .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 16px;
-    margin-bottom: 20px;
-    backdrop-filter: blur(10px);
-  }
-
-  .lives { font-size: 1.4em; letter-spacing: 4px; }
-  .floor-badge {
-    padding: 6px 16px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    border-radius: 20px;
-    font-weight: bold;
     font-size: 0.9em;
+    line-height: 2;
+    color: #b0a0cc;
   }
-  .score-display { font-size: 1.1em; font-weight: bold; color: #fbbf24; }
-  .combo-display { font-size: 0.85em; color: #34d399; margin-left: 8px; }
 
-  /* ===== ELEVATOR AREA ===== */
-  .elevator-wrapper {
+  .rules-box strong { color: #ffd700; }
+
+  /* ===== GAME SCREEN (MILYONER LAYOUT) ===== */
+  .game-layout {
     display: flex;
-    align-items: stretch;
-    margin-bottom: 20px;
-    gap: 12px;
-    min-height: 120px;
+    gap: 0;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 10px;
+    min-height: 100vh;
+    align-items: center;
   }
 
-  .floor-indicator {
+  /* LEFT: Main game area */
+  .game-main {
+    flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    padding: 15px;
+    min-width: 0;
+  }
+
+  /* RIGHT: Money ladder */
+  .money-ladder {
+    width: 220px;
+    flex-shrink: 0;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .ladder-step {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 14px;
+    margin-bottom: 2px;
+    border-radius: 6px;
+    font-size: 0.82em;
+    color: #7060a0;
+    transition: all 0.4s;
+    border: 1px solid transparent;
+    background: transparent;
+  }
+
+  .ladder-step .step-num {
+    font-weight: bold;
+    min-width: 22px;
+  }
+
+  .ladder-step .step-amount {
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .ladder-step.current {
+    color: #ffd700;
+    background: linear-gradient(90deg, rgba(255,165,0,0.15), rgba(255,165,0,0.25));
+    border-color: rgba(255,165,0,0.4);
+    box-shadow: 0 0 12px rgba(255,165,0,0.2);
+    font-size: 0.88em;
+  }
+
+  .ladder-step.passed {
+    color: #50c878;
+    background: rgba(80,200,120,0.08);
+  }
+
+  .ladder-step.milestone {
+    color: #c0a0ff;
+    border-bottom: 1px solid rgba(192,160,255,0.2);
+  }
+
+  .ladder-step.milestone.current {
+    color: #ffd700;
+    background: linear-gradient(90deg, rgba(255,165,0,0.15), rgba(255,165,0,0.25));
+    border-color: rgba(255,165,0,0.4);
+  }
+
+  /* ===== TOP BAR (lifelines + timer) ===== */
+  .top-section {
+    display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 60px;
-    padding: 10px 0;
+    margin-bottom: 15px;
+    padding: 0 5px;
   }
 
-  .floor-dot {
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.15);
-    transition: all 0.5s;
-    position: relative;
-  }
-
-  .floor-dot.active {
-    background: #fbbf24;
-    box-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
-  }
-
-  .floor-dot.passed {
-    background: #34d399;
-    box-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
-  }
-
-  .floor-dot::after {
-    content: attr(data-label);
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.65em;
-    color: #94a3b8;
-    white-space: nowrap;
-  }
-
-  .elevator-box {
-    flex: 1;
-    background: linear-gradient(180deg, #1e1b4b, #312e81);
-    border: 2px solid #4338ca;
-    border-radius: 16px;
+  .lifelines {
     display: flex;
-    flex-direction: column;
+    gap: 8px;
+  }
+
+  .lifeline-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,165,0,0.4);
+    background: rgba(255,165,0,0.08);
+    color: #ffd700;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.5s;
   }
 
-  .elevator-box.moving { animation: elevatorMove 0.8s ease-in-out; }
-  .elevator-box.shaking { animation: elevatorShake 0.6s ease-in-out; }
-
-  .elevator-doors {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    display: flex;
-    pointer-events: none;
-    z-index: 5;
+  .lifeline-btn:hover:not(:disabled) {
+    background: rgba(255,165,0,0.2);
+    transform: scale(1.1);
   }
 
-  .door-left, .door-right {
-    width: 45%;
-    height: 100%;
-    background: linear-gradient(180deg, #1e1b4b, #0f0a2e);
-    border: 1px solid #4338ca;
-    transition: width 0.8s ease-in-out;
-  }
-  .door-left { border-radius: 16px 0 0 16px; }
-  .door-right { border-radius: 0 16px 16px 0; margin-left: auto; }
-
-  .doors-open .door-left,
-  .doors-open .door-right { width: 5%; }
-
-  .elevator-emoji {
-    font-size: 50px;
-    margin-bottom: 8px;
-    z-index: 1;
+  .lifeline-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-color: rgba(255,255,255,0.1);
   }
 
-  .elevator-status {
-    font-size: 0.95em;
-    color: #a5b4fc;
-    font-weight: 500;
-    z-index: 1;
+  .lives-display {
+    font-size: 1.5em;
+    letter-spacing: 3px;
   }
 
-  /* ===== QUESTION AREA ===== */
-  .question-area {
-    background: rgba(255,255,255,0.05);
+  .timer-display {
+    font-size: 1.8em;
+    font-weight: 900;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255,165,0,0.4);
+    min-width: 45px;
+    text-align: center;
+  }
+
+  .timer-display.warning {
+    color: #ff4444;
+    animation: timerTick 0.5s ease-in-out infinite;
+    text-shadow: 0 0 15px rgba(255,50,50,0.6);
+  }
+
+  /* ===== QUESTION BOX (Diamond shape feel) ===== */
+  .question-box {
+    background: linear-gradient(180deg, rgba(20,10,60,0.9), rgba(10,5,40,0.95));
+    border: 2px solid rgba(255,165,0,0.3);
     border-radius: 20px;
-    padding: 30px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.08);
-    animation: slideUp 0.5s ease-out;
+    padding: 25px 30px;
+    margin-bottom: 20px;
+    text-align: center;
+    position: relative;
+    animation: slideUp 0.4s ease-out;
   }
 
-  .question-number {
-    font-size: 0.8em;
-    color: #8b5cf6;
-    font-weight: bold;
+  .question-box::before,
+  .question-box::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, rgba(255,165,0,0.3), transparent);
+    transform: translateY(-50%) rotate(45deg);
+  }
+  .question-box::before { left: -12px; }
+  .question-box::after { right: -12px; background: linear-gradient(225deg, rgba(255,165,0,0.3), transparent); }
+
+  .question-label {
+    font-size: 0.75em;
+    color: #ffa500;
+    font-weight: 700;
+    letter-spacing: 3px;
     text-transform: uppercase;
-    letter-spacing: 2px;
     margin-bottom: 12px;
   }
 
   .question-text {
-    font-size: 1.25em;
+    font-size: 1.15em;
     line-height: 1.6;
-    margin-bottom: 25px;
-    color: #f1f5f9;
+    color: #f0e8ff;
+    font-weight: 500;
   }
 
-  .options-grid {
+  /* ===== ANSWER OPTIONS (Diamond-shaped buttons) ===== */
+  .options-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 
   .option-btn {
-    padding: 16px 20px;
-    font-size: 1em;
-    border: 2px solid rgba(99, 102, 241, 0.3);
-    border-radius: 14px;
-    background: rgba(99, 102, 241, 0.08);
-    color: #e2e8f0;
+    position: relative;
+    padding: 14px 20px 14px 55px;
+    font-size: 0.95em;
+    border: 2px solid rgba(255,165,0,0.25);
+    border-radius: 30px;
+    background: linear-gradient(180deg, rgba(255,165,0,0.08), rgba(255,140,0,0.04));
+    color: #e0d8f0;
     cursor: pointer;
     transition: all 0.25s;
     text-align: left;
-    line-height: 1.4;
-    position: relative;
-    overflow: hidden;
+    line-height: 1.3;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
   }
 
   .option-btn:hover:not(:disabled) {
-    border-color: #6366f1;
-    background: rgba(99, 102, 241, 0.2);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.15);
+    border-color: rgba(255,165,0,0.6);
+    background: linear-gradient(180deg, rgba(255,165,0,0.2), rgba(255,140,0,0.1));
+    transform: scale(1.02);
   }
 
-  .option-btn:disabled { cursor: not-allowed; opacity: 0.85; }
-
-  .option-btn.correct {
-    border-color: #34d399;
-    background: rgba(52, 211, 153, 0.2);
-    color: #6ee7b7;
-  }
-
-  .option-btn.wrong {
-    border-color: #f87171;
-    background: rgba(248, 113, 113, 0.15);
-    color: #fca5a5;
-    animation: shake 0.5s;
-  }
+  .option-btn:disabled { cursor: not-allowed; }
 
   .option-letter {
-    display: inline-block;
-    width: 28px; height: 28px;
-    line-height: 28px;
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px; height: 30px;
+    line-height: 30px;
     text-align: center;
-    border-radius: 8px;
-    background: rgba(99, 102, 241, 0.2);
-    margin-right: 10px;
-    font-weight: bold;
-    font-size: 0.85em;
-    vertical-align: middle;
+    color: #ffa500;
+    font-weight: 900;
+    font-size: 0.9em;
+    border-right: 1px solid rgba(255,165,0,0.3);
+    padding-right: 8px;
   }
 
-  /* ===== BOOK NOTE POPUP ===== */
+  .option-btn.selected {
+    animation: selectedPulse 0.8s ease-in-out infinite;
+    border-color: #ffa500;
+  }
+
+  .option-btn.correct {
+    border-color: #50c878;
+    background: linear-gradient(180deg, rgba(80,200,120,0.3), rgba(80,200,120,0.15));
+    color: #a0ffc0;
+    animation: correctFlash 0.6s ease-out;
+  }
+  .option-btn.correct .option-letter { color: #50c878; }
+
+  .option-btn.wrong {
+    border-color: #ff4444;
+    background: linear-gradient(180deg, rgba(220,50,50,0.3), rgba(220,50,50,0.15));
+    color: #ffaaaa;
+    animation: shake 0.5s;
+  }
+  .option-btn.wrong .option-letter { color: #ff4444; }
+
+  /* ===== OVERLAY & POPUPS ===== */
   .overlay {
     display: none;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(5,2,22,0.85);
     z-index: 100;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(6px);
   }
   .overlay.active { display: flex; }
 
-  .book-note {
-    background: linear-gradient(135deg, #1e1b4b, #312e81);
-    border: 2px solid #6366f1;
-    border-radius: 24px;
+  .popup {
+    background: linear-gradient(180deg, #1a0e45, #0d0628);
+    border: 2px solid rgba(255,165,0,0.4);
+    border-radius: 20px;
     padding: 35px;
-    max-width: 550px;
+    max-width: 520px;
     width: 90%;
     animation: popIn 0.4s ease-out;
-    position: relative;
+    text-align: center;
   }
 
-  .book-note-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
+  .popup-icon { font-size: 55px; margin-bottom: 12px; }
+
+  .popup h3 {
+    font-size: 1.3em;
+    margin-bottom: 10px;
   }
 
-  .book-note-header .icon { font-size: 30px; }
+  .popup .correct-title { color: #50c878; }
+  .popup .wrong-title { color: #ffa500; }
 
-  .book-note-header h3 {
-    font-size: 1.2em;
-    color: #fbbf24;
+  .popup-subtitle {
+    color: #a08cc0;
+    font-size: 0.95em;
+    margin-bottom: 5px;
+  }
+
+  .popup-amount {
+    font-size: 1.4em;
+    font-weight: 900;
+    color: #ffd700;
+    margin: 10px 0 15px;
+  }
+
+  /* Book note styling inside popup */
+  .book-note-box {
+    text-align: left;
+    margin: 15px 0;
+    padding: 18px;
+    background: rgba(255,165,0,0.06);
+    border: 1px solid rgba(255,165,0,0.15);
+    border-radius: 12px;
+    border-left: 4px solid #ffa500;
+  }
+
+  .book-note-label {
+    font-size: 0.8em;
+    font-weight: 700;
+    color: #ffa500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
   }
 
   .book-note-term {
-    font-size: 1.05em;
-    font-weight: bold;
-    color: #a5b4fc;
-    margin-bottom: 12px;
-    padding: 10px 14px;
-    background: rgba(99, 102, 241, 0.12);
-    border-radius: 10px;
-    border-left: 4px solid #6366f1;
+    font-size: 1em;
+    font-weight: 700;
+    color: #c0a0ff;
+    margin-bottom: 10px;
   }
 
   .book-note-text {
-    font-size: 0.95em;
+    font-size: 0.88em;
     line-height: 1.8;
-    color: #cbd5e1;
+    color: #b0a0cc;
   }
 
-  .book-note-btn {
-    margin-top: 22px;
-    padding: 14px 35px;
+  .popup-btn {
+    margin-top: 18px;
+    padding: 14px 40px;
     font-size: 1em;
-    font-weight: bold;
-    border: none;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: white;
+    font-weight: 700;
+    border: 2px solid #ffa500;
+    border-radius: 30px;
+    background: linear-gradient(180deg, rgba(255,165,0,0.2), rgba(255,140,0,0.1));
+    color: #ffd700;
     cursor: pointer;
     transition: all 0.3s;
     width: 100%;
   }
 
-  .book-note-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+  .popup-btn:hover {
+    background: linear-gradient(180deg, rgba(255,165,0,0.4), rgba(255,140,0,0.2));
+    transform: scale(1.03);
   }
-
-  /* correct answer popup */
-  .correct-popup {
-    text-align: center;
-  }
-  .correct-popup .icon { font-size: 60px; margin-bottom: 10px; }
-  .correct-popup h3 { color: #34d399; font-size: 1.4em; margin-bottom: 8px; }
-  .correct-popup p { color: #94a3b8; }
 
   /* ===== END SCREEN ===== */
-  .end-screen { text-align: center; padding: 40px 20px; }
+  .end-screen {
+    text-align: center;
+    padding: 40px 20px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
 
-  .end-emoji { font-size: 80px; margin-bottom: 15px; animation: float 3s ease-in-out infinite; }
+  .end-icon { font-size: 70px; margin-bottom: 15px; animation: float 3s ease-in-out infinite; }
 
-  .end-screen h2 {
+  .end-title {
     font-size: 2em;
-    margin-bottom: 10px;
-    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    font-weight: 900;
+    background: linear-gradient(180deg, #ffd700, #ff8c00);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    margin-bottom: 10px;
   }
 
-  .end-screen .final-score {
-    font-size: 1.5em;
-    color: #a5b4fc;
+  .end-amount {
+    font-size: 1.6em;
+    color: #ffd700;
+    font-weight: 900;
     margin-bottom: 25px;
   }
 
-  .stats-grid {
+  .end-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
+    gap: 12px;
     margin-bottom: 30px;
   }
 
-  .stat-card {
-    background: rgba(255,255,255,0.06);
-    border-radius: 16px;
-    padding: 20px 10px;
-    border: 1px solid rgba(255,255,255,0.08);
+  .end-stat {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,165,0,0.12);
+    border-radius: 14px;
+    padding: 18px 10px;
   }
 
-  .stat-card .value { font-size: 1.8em; font-weight: bold; color: #fbbf24; }
-  .stat-card .label { font-size: 0.8em; color: #94a3b8; margin-top: 4px; }
+  .end-stat .val { font-size: 1.6em; font-weight: 900; color: #ffd700; }
+  .end-stat .lbl { font-size: 0.75em; color: #8070a0; margin-top: 4px; }
 
-  .restart-btn {
+  .end-btn {
     padding: 16px 45px;
     font-size: 1.1em;
-    font-weight: bold;
-    border: none;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: white;
+    font-weight: 700;
+    border: 2px solid #ffa500;
+    border-radius: 30px;
+    background: linear-gradient(180deg, rgba(255,165,0,0.2), rgba(255,140,0,0.1));
+    color: #ffd700;
     cursor: pointer;
     transition: all 0.3s;
   }
 
-  .restart-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+  .end-btn:hover {
+    background: linear-gradient(180deg, rgba(255,165,0,0.4), rgba(255,140,0,0.2));
+    transform: scale(1.05);
   }
 
-  /* ===== PROGRESS BAR ===== */
-  .progress-bar-container {
-    width: 100%;
-    height: 6px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 3px;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-
-  .progress-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6, #fbbf24);
-    border-radius: 3px;
-    transition: width 0.5s ease;
-    width: 0%;
+  /* ===== 50:50 dimmed options ===== */
+  .option-btn.eliminated {
+    opacity: 0.15;
+    pointer-events: none;
+    border-color: rgba(255,255,255,0.05);
   }
 
   /* ===== RESPONSIVE ===== */
-  @media (max-width: 600px) {
-    .options-grid { grid-template-columns: 1fr; }
-    .start-screen h1 { font-size: 1.8em; }
-    .question-text { font-size: 1.05em; }
-    .stats-grid { grid-template-columns: 1fr; }
-    .elevator-wrapper { flex-direction: column; }
-    .floor-indicator { flex-direction: row; width: 100%; }
+  @media (max-width: 768px) {
+    .game-layout { flex-direction: column-reverse; padding: 10px; }
+    .money-ladder {
+      width: 100%;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2px;
+      padding: 8px;
+    }
+    .ladder-step {
+      font-size: 0.7em;
+      padding: 4px 8px;
+      margin: 0;
+    }
+    .game-main { padding: 10px 5px; }
+    .options-container { grid-template-columns: 1fr; }
+    .question-text { font-size: 1em; }
+    .start-screen h1 { font-size: 1.6em; }
+    .end-stats { grid-template-columns: 1fr; }
+    .question-box::before, .question-box::after { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    .logo-container { width: 140px; height: 140px; }
+    .logo-ring { width: 140px; height: 140px; }
+    .logo-ring-inner { width: 115px; height: 115px; top: 12px; left: 12px; }
+    .logo-center .title-vc { font-size: 1.2em; }
+    .option-btn { font-size: 0.85em; padding: 12px 15px 12px 48px; }
   }
 </style>
 </head>
 <body>
 
-<div class="game-container">
-
-  <!-- ========== START SCREEN ========== -->
-  <div id="startScreen" class="screen start-screen active">
-    <div class="elevator-preview">🏢</div>
-    <h1>Startup Yolculuğu</h1>
-    <p class="subtitle">VC Terminoloji Oyunu</p>
-    <button class="start-btn" onclick="startGame()">🚀 Yolculuğa Başla</button>
-    <div class="instructions">
-      <p>🎯 <span>Amaç:</span> Garajdan başla, asansörle Unicorn katına çık!</p>
-      <p>✅ <span>Doğru cevap:</span> Bir kat yukarı çık ve puan kazan.</p>
-      <p>❌ <span>Yanlış cevap:</span> Bir can kaybet ama kitaptan öğren!</p>
-      <p>❤️ <span>3 canın</span> var. Canların biterse oyun biter.</p>
-      <p>🔥 <span>Combo:</span> Art arda doğru cevaplarla bonus puan kazan!</p>
+<!-- ========== START SCREEN ========== -->
+<div id="startScreen" class="screen start-screen active">
+  <div class="logo-container">
+    <div class="logo-ring"></div>
+    <div class="logo-ring-inner"></div>
+    <div class="logo-center">
+      <div class="title-vc">VC</div>
+      <div class="title-sub">MILYONER</div>
     </div>
   </div>
 
-  <!-- ========== GAME SCREEN ========== -->
-  <div id="gameScreen" class="screen game-screen">
-    <!-- Top Bar -->
-    <div class="top-bar">
-      <div class="lives" id="livesDisplay">❤️❤️❤️</div>
-      <div class="floor-badge" id="floorBadge">📍 Garaj</div>
-      <div>
-        <span class="score-display" id="scoreDisplay">⭐ 0</span>
-        <span class="combo-display" id="comboDisplay"></span>
-      </div>
-    </div>
+  <h1 class="start-title">Kim VC Milyoneri Olmak Ister?</h1>
+  <p class="start-subtitle">Venture Capital Terminoloji Oyunu</p>
 
-    <!-- Progress Bar -->
-    <div class="progress-bar-container">
-      <div class="progress-bar-fill" id="progressBar"></div>
-    </div>
+  <button class="start-btn" onclick="startGame()">OYUNA BASLA</button>
 
-    <!-- Elevator Area -->
-    <div class="elevator-wrapper">
-      <div class="floor-indicator" id="floorIndicator">
-        <!-- Filled by JS -->
-      </div>
-      <div class="elevator-box" id="elevatorBox">
-        <div class="elevator-doors" id="elevatorDoors">
-          <div class="door-left"></div>
-          <div class="door-right"></div>
+  <div class="rules-box">
+    <p><strong>Amac:</strong> VC sorularini dogru cevaplayarak para odullerini kazan!</p>
+    <p><strong>Dogru cevap:</strong> Bir sonraki seviyeye gec ve odulunu artir.</p>
+    <p><strong>Yanlis cevap:</strong> 3 canin var. Can kaybetmeden once terimi ogren!</p>
+    <p><strong>Jokerler:</strong> 50:50 (2 yanlis sik elenir) | Pas Gec (soruyu atla)</p>
+    <p><strong>Zamanlayici:</strong> Her soru icin 30 saniye suren var!</p>
+  </div>
+</div>
+
+<!-- ========== GAME SCREEN ========== -->
+<div id="gameScreen" class="screen">
+  <div class="game-layout">
+
+    <!-- LEFT: Main game -->
+    <div class="game-main">
+      <!-- Top section: lifelines, lives, timer -->
+      <div class="top-section">
+        <div class="lifelines">
+          <button class="lifeline-btn" id="btn5050" onclick="use5050()" title="50:50 - Iki yanlis sik elenir">50</button>
+          <button class="lifeline-btn" id="btnPas" onclick="usePas()" title="Pas Gec - Soruyu atla">&#10140;</button>
         </div>
-        <div class="elevator-emoji" id="elevatorEmoji">🧑‍💼</div>
-        <div class="elevator-status" id="elevatorStatus">Hazır mısın?</div>
+        <div class="lives-display" id="livesDisplay"></div>
+        <div class="timer-display" id="timerDisplay">30</div>
       </div>
+
+      <!-- Question box -->
+      <div class="question-box" id="questionBox">
+        <div class="question-label" id="questionLabel"></div>
+        <div class="question-text" id="questionText"></div>
+      </div>
+
+      <!-- Answer options -->
+      <div class="options-container" id="optionsContainer"></div>
     </div>
 
-    <!-- Question Area -->
-    <div class="question-area" id="questionArea">
-      <div class="question-number" id="questionNumber"></div>
-      <div class="question-text" id="questionText"></div>
-      <div class="options-grid" id="optionsGrid"></div>
-    </div>
-  </div>
+    <!-- RIGHT: Money ladder -->
+    <div class="money-ladder" id="moneyLadder"></div>
 
-  <!-- ========== END SCREEN ========== -->
-  <div id="endScreen" class="screen end-screen">
-    <div class="end-emoji" id="endEmoji">🦄</div>
-    <h2 id="endTitle">Tebrikler!</h2>
-    <p class="final-score" id="finalScore"></p>
-    <div class="stats-grid" id="statsGrid"></div>
-    <button class="restart-btn" onclick="restartGame()">🔄 Tekrar Oyna</button>
   </div>
+</div>
 
-  <!-- ========== BOOK NOTE POPUP ========== -->
-  <div class="overlay" id="bookNoteOverlay">
-    <div class="book-note" id="bookNoteContent">
-      <!-- Filled by JS -->
-    </div>
-  </div>
+<!-- ========== END SCREEN ========== -->
+<div id="endScreen" class="screen end-screen">
+  <div class="end-icon" id="endIcon"></div>
+  <h2 class="end-title" id="endTitle"></h2>
+  <div class="end-amount" id="endAmount"></div>
+  <div class="end-stats" id="endStats"></div>
+  <button class="end-btn" onclick="restartGame()">TEKRAR OYNA</button>
+</div>
 
-  <!-- ========== CORRECT POPUP ========== -->
-  <div class="overlay" id="correctOverlay">
-    <div class="book-note correct-popup">
-      <div class="icon" id="correctIcon">🎉</div>
-      <h3 id="correctTitle">Doğru Cevap!</h3>
-      <p id="correctSubtitle">Harika, bir kat yukarı!</p>
-      <button class="book-note-btn" onclick="closeCorrectPopup()">Devam Et ➡️</button>
-    </div>
-  </div>
-
+<!-- ========== POPUPS ========== -->
+<div class="overlay" id="popupOverlay">
+  <div class="popup" id="popupContent"></div>
 </div>
 
 <script>
 /* ================================================================
-   STARTUP YOLCULUĞU - VC TERMİNOLOJİ OYUNU
-   Tüm oyun mantığı bu <script> bloğu içindedir.
-================================================================ */
+   KIM VC MILYONERI OLMAK ISTER?
+   VC Terminoloji Egitim Oyunu
+   ================================================================ */
 
 /* ================================================================
-   📚 SORU VERİ YAPISI (DATA STRUCTURE)
+   SORU VERI YAPISI (DATA STRUCTURE)
    ================================================================
-   Yeni soru eklemek çok kolay! Aşağıdaki diziye aynı formatta
+   Yeni soru eklemek cok kolay! Asagidaki diziye ayni formatta
    yeni bir obje ekleyin:
 
    {
      soru: "Soru metni buraya",
-     siklar: ["A şıkkı", "B şıkkı", "C şıkkı", "D şıkkı"],
-     dogruCevap: 0,   // 0=A, 1=B, 2=C, 3=D (sıfırdan başlar)
-     terim: "Terimin Adı",
-     kitapAciklamasi: "Kitaptaki açıklama metni buraya gelir..."
+     siklar: ["A sikki", "B sikki", "C sikki", "D sikki"],
+     dogruCevap: 0,   // 0=A, 1=B, 2=C, 3=D (sifirdan baslar)
+     terim: "Terimin Adi",
+     kitapAciklamasi: "Kitaptaki aciklama metni buraya gelir..."
    }
 
-   dogruCevap alanı, siklar dizisindeki doğru cevabın
-   indeksini (0'dan başlayarak) belirtir.
+   dogruCevap alani, siklar dizisindeki dogru cevabin
+   indeksini (0'dan baslayarak) belirtir.
    ================================================================ */
 
 const sorular = [
   {
-    soru: "Bir startup'ın piyasa değerinin 1 milyar doları aşması durumunda ona ne ad verilir?",
+    soru: "Bir startup'in piyasa degerinin 1 milyar dolari asmasi durumunda ona ne ad verilir?",
     siklar: [
-      "Unicorn 🦄",
-      "Centaur 🐴",
-      "Decacorn 🌟",
-      "Gazelle 🦌"
+      "Unicorn",
+      "Centaur",
+      "Decacorn",
+      "Gazelle"
     ],
     dogruCevap: 0,
     terim: "Unicorn (Tek Boynuzlu At)",
-    kitapAciklamasi: "Unicorn, değerlemesi 1 milyar doların üzerinde olan özel (halka açılmamış) girişim şirketlerine verilen isimdir. Bu terim ilk kez 2013 yılında yatırımcı Aileen Lee tarafından kullanılmıştır. Terimin 'efsanevi' bir yaratığa atıfta bulunması, bu değerlemeye ulaşmanın nadir ve olağanüstü bir başarı olduğunu vurgular. Decacorn ise 10 milyar doları aşan şirketler için kullanılır."
+    kitapAciklamasi: "Unicorn, degerlemesi 1 milyar dolarin uzerinde olan ozel (halka acilmamis) girisim sirketlerine verilen isimdir. Bu terim ilk kez 2013 yilinda yatirimci Aileen Lee tarafindan kullanilmistir. Terimin 'efsanevi' bir yaratiga atifta bulunmasi, bu degerlemeye ulasmanin nadir ve olaganustu bir basari oldugunu vurgular. Decacorn ise 10 milyar dolari asan sirketler icin kullanilir."
   },
   {
-    soru: "Bir yatırımcının, yatırım yaptığı şirketin bir sonraki yatırım turunda, mevcut hissesini korumak için ek yatırım yapma hakkına ne denir?",
+    soru: "Bir yatirimcinin, yatirim yaptigi sirketin bir sonraki yatirim turunda, mevcut hissesini korumak icin ek yatirim yapma hakkina ne denir?",
     siklar: [
       "Liquidation Preference",
-      "Pro-Rata Hakkı",
+      "Pro-Rata Hakki",
       "Anti-Dilution",
-      "Drag-Along Hakkı"
+      "Drag-Along Hakki"
     ],
     dogruCevap: 1,
-    terim: "Pro-Rata Hakkı",
-    kitapAciklamasi: "Pro-Rata hakkı, mevcut yatırımcılara gelecekteki fonlama turlarında sahip oldukları yüzdesel paylarını koruyabilmeleri için orantılı miktarda ek yatırım yapma imkânı tanır. Bu hak, erken aşama yatırımcılar için son derece değerlidir çünkü başarılı şirketlerde paylarının seyrelmesini (dilution) önler. Yatırımcılar bu hakkı term sheet müzakerelerinde sıklıkla talep eder."
+    terim: "Pro-Rata Hakki",
+    kitapAciklamasi: "Pro-Rata hakki, mevcut yatirimcilara gelecekteki fonlama turlarinda sahip olduklari yuzdesel paylarini koruyabilmeleri icin orantili miktarda ek yatirim yapma imkani tanir. Bu hak, erken asama yatirimcilar icin son derece degerlidir cunku basarili sirketlerde paylarinin seyrelmesini (dilution) onler. Yatirimcilar bu hakki term sheet muzakerelerinde siklikla talep eder."
   },
   {
-    soru: "Bir startup'ın henüz gelir elde etmeden, sadece fikir ve ekip aşamasındayken aldığı ilk yatırım turuna ne ad verilir?",
+    soru: "Bir startup'in henuz gelir elde etmeden, sadece fikir ve ekip asamasindayken aldigi ilk yatirim turuna ne ad verilir?",
     siklar: [
       "Series A",
       "Bridge Round",
@@ -675,11 +762,11 @@ const sorular = [
       "Mezzanine"
     ],
     dogruCevap: 2,
-    terim: "Pre-Seed / Seed (Tohum Yatırımı)",
-    kitapAciklamasi: "Pre-Seed ve Seed turları, bir startup'ın yaşam döngüsündeki en erken aşama yatırımlardır. Bu aşamada genellikle ortada somut bir ürün yoktur; yatırımcılar kurucunun vizyonuna, ekibin kalitesine ve pazar fırsatının büyüklüğüne güvenerek yatırım yapar. Tohum yatırımı genellikle 100 bin ile 2 milyon dolar arasında değişir ve melek yatırımcılar (angel investors) veya erken aşama VC fonları tarafından sağlanır."
+    terim: "Pre-Seed / Seed (Tohum Yatirimi)",
+    kitapAciklamasi: "Pre-Seed ve Seed turlari, bir startup'in yasam dongusundeki en erken asama yatirimlardir. Bu asamada genellikle ortada somut bir urun yoktur; yatirimcilar kurucunun vizyonuna, ekibin kalitesine ve pazar firsatinin buyuklugune guvenerek yatirim yapar. Tohum yatirimi genellikle 100 bin ile 2 milyon dolar arasinda degisir ve melek yatirimcilar (angel investors) veya erken asama VC fonlari tarafindan saglanir."
   },
   {
-    soru: "Bir şirketin tasfiye (satış veya kapanma) durumunda, yatırımcıların diğer hissedarlardan önce paralarını geri alma hakkına ne denir?",
+    soru: "Bir sirketin tasfiye (satis veya kapanma) durumunda, yatirimcilarin diger hissedarlardan once paralarini geri alma hakkina ne denir?",
     siklar: [
       "Vesting",
       "Cap Table",
@@ -688,56 +775,75 @@ const sorular = [
     ],
     dogruCevap: 3,
     terim: "Liquidation Preference (Tasfiye Tercihi)",
-    kitapAciklamasi: "Liquidation Preference, yatırımcılara şirketin satılması, birleşmesi veya kapanması durumunda yatırdıkları parayı (genellikle 1x veya daha fazla çarpanla) diğer hissedarlardan önce geri alma önceliği verir. Bu mekanizma yatırımcıyı aşağı yönlü risklere (downside risk) karşı korur. Örneğin, 1x non-participating liquidation preference ile 5 milyon dolar yatıran bir yatırımcı, şirket satıldığında ilk 5 milyon doları almayı garanti eder."
+    kitapAciklamasi: "Liquidation Preference, yatirimcilara sirketin satilmasi, birlesmesi veya kapanmasi durumunda yatirdiklari parayi (genellikle 1x veya daha fazla carpanla) diger hissedarlardan once geri alma onceligi verir. Bu mekanizma yatirimciyi asagi yonlu risklere (downside risk) karsi korur. Ornegin, 1x non-participating liquidation preference ile 5 milyon dolar yatiran bir yatirimci, sirket satildiginda ilk 5 milyon dolari almayi garanti eder."
   },
   {
-    soru: "Bir startup'ın aylık bazda ne kadar nakit harcadığını gösteren ve 'kaç ay daha hayatta kalabileceğini' hesaplamaya yarayan metrik hangisidir?",
+    soru: "Bir startup'in aylik bazda ne kadar nakit harcadigini gosteren ve 'kac ay daha hayatta kalabilecegini' hesaplamaya yarayan metrik hangisidir?",
     siklar: [
-      "Burn Rate 🔥",
+      "Burn Rate",
       "Churn Rate",
       "Runway",
       "Gross Margin"
     ],
     dogruCevap: 0,
-    terim: "Burn Rate (Yakma Oranı)",
-    kitapAciklamasi: "Burn Rate, bir startup'ın aylık bazda harcadığı net nakit miktarını ifade eder. Gross Burn Rate tüm aylık harcamaları gösterirken, Net Burn Rate gelirler düşüldükten sonra kalan nakit kaybını gösterir. Bu metrik, startup'ın 'Runway'ini (pisti) hesaplamak için kullanılır: Mevcut nakit / Aylık Burn Rate = Kalan ay sayısı. Örneğin, bankada 1.2 milyon dolar olan ve ayda 100 bin dolar harcayan bir startup'ın runway'i 12 aydır."
+    terim: "Burn Rate (Yakma Orani)",
+    kitapAciklamasi: "Burn Rate, bir startup'in aylik bazda harcadigi net nakit miktarini ifade eder. Gross Burn Rate tum aylik harcamalari gosterirken, Net Burn Rate gelirler dusuldukten sonra kalan nakit kaybini gosterir. Bu metrik, startup'in 'Runway'ini (pisti) hesaplamak icin kullanilir: Mevcut nakit / Aylik Burn Rate = Kalan ay sayisi. Ornegin, bankada 1.2 milyon dolar olan ve ayda 100 bin dolar harcayan bir startup'in runway'i 12 aydir."
   }
 ];
 
 /* ================================================================
-   🎮 OYUN DEĞİŞKENLERİ
-================================================================ */
+   PARA ODUL BASAMAKLARI (Money Ladder)
+   ================================================================
+   Her soru bir basamaga karsilik gelir.
+   Soru sayisi kadar basamak otomatik olusturulur.
+   Milestone basamaklar (her 5. soru) ozel renkle gosterilir.
+   ================================================================ */
 
-const katlar = [
-  { isim: "Garaj 🏠", emoji: "🧑‍💻" },
-  { isim: "Seed 🌱", emoji: "🌱" },
-  { isim: "Series A 📈", emoji: "📈" },
-  { isim: "Series B 🚀", emoji: "🚀" },
-  { isim: "Unicorn 🦄", emoji: "🦄" },
-  { isim: "IPO 🔔", emoji: "🔔" }
-];
+function oduBarsamaklariOlustur(soruSayisi) {
+  const basamaklar = [];
+  const oduller = [
+    "500", "1.000", "2.000", "3.000", "5.000",
+    "7.500", "10.000", "15.000", "25.000", "30.000",
+    "60.000", "125.000", "250.000", "500.000", "1.000.000"
+  ];
+  for (let i = 0; i < soruSayisi; i++) {
+    const odel = i < oduller.length ? oduller[i] : ((i + 1) * 50000).toLocaleString('tr-TR');
+    basamaklar.push({
+      num: i + 1,
+      amount: odel + " TL",
+      milestone: (i + 1) % 5 === 0
+    });
+  }
+  return basamaklar;
+}
+
+/* ================================================================
+   OYUN DEGISKENLERI
+   ================================================================ */
 
 let mevcutSoru = 0;
 let can = 3;
-let puan = 0;
-let combo = 0;
-let maxCombo = 0;
 let dogruSayisi = 0;
 let yanlisSayisi = 0;
-let mevcutKat = 0;
 let karisikSorular = [];
+let basamaklar = [];
+let joker5050 = true;
+let jokerPas = true;
+let timerInterval = null;
+let kalanSure = 30;
+let cevapVerildi = false;
 
 /* ================================================================
-   🔧 YARDIMCI FONKSİYONLAR
-================================================================ */
+   YARDIMCI FONKSIYONLAR
+   ================================================================ */
 
-function soruKaristir(arr) {
-  const shuffled = [...arr];
-  for (let i = shuffled.length - 1; i > 0; i--) {
+function karistir(arr) {
+  const s = [...arr];
+  for (let i = s.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    [s[i], s[j]] = [s[j], s[i]];
   }
-  return shuffled;
+  return s;
 }
 
 function ekranGoster(id) {
@@ -746,22 +852,25 @@ function ekranGoster(id) {
 }
 
 /* ================================================================
-   🚀 OYUN BAŞLATMA
-================================================================ */
+   OYUN BASLATMA
+   ================================================================ */
 
 function startGame() {
   mevcutSoru = 0;
   can = 3;
-  puan = 0;
-  combo = 0;
-  maxCombo = 0;
   dogruSayisi = 0;
   yanlisSayisi = 0;
-  mevcutKat = 0;
-  karisikSorular = soruKaristir(sorular);
+  joker5050 = true;
+  jokerPas = true;
+  cevapVerildi = false;
+  karisikSorular = karistir(sorular);
+  basamaklar = oduBarsamaklariOlustur(karisikSorular.length);
+
+  document.getElementById('btn5050').disabled = false;
+  document.getElementById('btnPas').disabled = false;
 
   ekranGoster('gameScreen');
-  katGuncelle();
+  merdivenCiz();
   soruGoster();
 }
 
@@ -770,82 +879,107 @@ function restartGame() {
 }
 
 /* ================================================================
-   🏢 KAT VE ASANSÖR YÖNETİMİ
-================================================================ */
+   PARA MERDIVENI CIZIMI
+   ================================================================ */
 
-function katGuncelle() {
-  // Lives
-  document.getElementById('livesDisplay').textContent = '❤️'.repeat(can) + '🖤'.repeat(3 - can);
+function merdivenCiz() {
+  const ladder = document.getElementById('moneyLadder');
+  ladder.innerHTML = '';
 
-  // Floor badge
-  const kat = katlar[Math.min(mevcutKat, katlar.length - 1)];
-  document.getElementById('floorBadge').textContent = '📍 ' + kat.isim;
+  for (let i = basamaklar.length - 1; i >= 0; i--) {
+    const step = document.createElement('div');
+    step.className = 'ladder-step';
+    step.id = 'step-' + i;
 
-  // Elevator emoji
-  document.getElementById('elevatorEmoji').textContent = kat.emoji;
+    if (basamaklar[i].milestone) step.classList.add('milestone');
+    if (i === mevcutSoru) step.classList.add('current');
+    if (i < mevcutSoru) step.classList.add('passed');
 
-  // Score
-  document.getElementById('scoreDisplay').textContent = '⭐ ' + puan;
+    step.innerHTML =
+      '<span class="step-num">' + basamaklar[i].num + '</span>' +
+      '<span class="step-amount">' + basamaklar[i].amount + '</span>';
 
-  // Combo
-  const comboEl = document.getElementById('comboDisplay');
-  comboEl.textContent = combo > 1 ? '🔥 x' + combo + ' Combo!' : '';
-
-  // Progress bar
-  const progress = (mevcutSoru / karisikSorular.length) * 100;
-  document.getElementById('progressBar').style.width = progress + '%';
-
-  // Floor indicators
-  const indicator = document.getElementById('floorIndicator');
-  indicator.innerHTML = '';
-  for (let i = katlar.length - 1; i >= 0; i--) {
-    const dot = document.createElement('div');
-    dot.className = 'floor-dot';
-    if (i === mevcutKat) dot.classList.add('active');
-    if (i < mevcutKat) dot.classList.add('passed');
-    dot.setAttribute('data-label', katlar[i].isim);
-    indicator.appendChild(dot);
+    ladder.appendChild(step);
   }
 }
 
-function asansorYukariAnimasyon() {
-  const box = document.getElementById('elevatorBox');
-  const doors = document.getElementById('elevatorDoors');
-  const status = document.getElementById('elevatorStatus');
-
-  // Close doors
-  doors.classList.remove('doors-open');
-  status.textContent = 'Yukarı çıkılıyor...';
-
-  setTimeout(() => {
-    box.classList.add('moving');
-    mevcutKat = Math.min(mevcutKat + 1, katlar.length - 1);
-    katGuncelle();
-  }, 400);
-
-  setTimeout(() => {
-    box.classList.remove('moving');
-    doors.classList.add('doors-open');
-    status.textContent = katlar[Math.min(mevcutKat, katlar.length - 1)].isim + ' katına hoş geldiniz!';
-  }, 1200);
-}
-
-function asansorSallaAnimasyon() {
-  const box = document.getElementById('elevatorBox');
-  const status = document.getElementById('elevatorStatus');
-
-  box.classList.add('shaking');
-  status.textContent = '⚠️ Asansör sallanıyor!';
-
-  setTimeout(() => {
-    box.classList.remove('shaking');
-    status.textContent = 'Devam edelim...';
-  }, 700);
+function merdivenGuncelle() {
+  basamaklar.forEach((b, i) => {
+    const el = document.getElementById('step-' + i);
+    if (!el) return;
+    el.classList.remove('current', 'passed');
+    if (i === mevcutSoru) el.classList.add('current');
+    if (i < mevcutSoru) el.classList.add('passed');
+  });
 }
 
 /* ================================================================
-   ❓ SORU GÖSTERİMİ
-================================================================ */
+   TIMER
+   ================================================================ */
+
+function timerBaslat() {
+  timerDurdur();
+  kalanSure = 30;
+  const display = document.getElementById('timerDisplay');
+  display.textContent = kalanSure;
+  display.classList.remove('warning');
+
+  timerInterval = setInterval(() => {
+    kalanSure--;
+    display.textContent = kalanSure;
+
+    if (kalanSure <= 10) {
+      display.classList.add('warning');
+    }
+
+    if (kalanSure <= 0) {
+      timerDurdur();
+      sureBitti();
+    }
+  }, 1000);
+}
+
+function timerDurdur() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function sureBitti() {
+  if (cevapVerildi) return;
+  cevapVerildi = true;
+
+  const s = karisikSorular[mevcutSoru];
+  const butonlar = document.querySelectorAll('.option-btn');
+  butonlar.forEach(b => b.disabled = true);
+  butonlar[s.dogruCevap].classList.add('correct');
+
+  can--;
+  yanlisSayisi++;
+  canGuncelle();
+
+  setTimeout(() => {
+    yanlisPopupGoster(s, "Sure doldu!");
+  }, 800);
+}
+
+/* ================================================================
+   CAN GUNCELLEME
+   ================================================================ */
+
+function canGuncelle() {
+  const el = document.getElementById('livesDisplay');
+  let hearts = '';
+  for (let i = 0; i < 3; i++) {
+    hearts += i < can ? '\u2764\uFE0F' : '\uD83D\uDDA4';
+  }
+  el.textContent = hearts;
+}
+
+/* ================================================================
+   SORU GOSTERIMI
+   ================================================================ */
 
 function soruGoster() {
   if (mevcutSoru >= karisikSorular.length || can <= 0) {
@@ -853,160 +987,204 @@ function soruGoster() {
     return;
   }
 
+  cevapVerildi = false;
+  canGuncelle();
+  merdivenGuncelle();
+
   const s = karisikSorular[mevcutSoru];
 
-  document.getElementById('questionNumber').textContent =
+  document.getElementById('questionLabel').textContent =
     'SORU ' + (mevcutSoru + 1) + ' / ' + karisikSorular.length;
   document.getElementById('questionText').textContent = s.soru;
 
-  const grid = document.getElementById('optionsGrid');
-  grid.innerHTML = '';
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
   const harfler = ['A', 'B', 'C', 'D'];
 
   s.siklar.forEach((sik, i) => {
     const btn = document.createElement('button');
     btn.className = 'option-btn';
-    btn.innerHTML = '<span class="option-letter">' + harfler[i] + '</span>' + sik;
-    btn.onclick = () => cevapKontrol(i);
-    grid.appendChild(btn);
+    btn.id = 'opt-' + i;
+    btn.innerHTML = '<span class="option-letter">' + harfler[i] + ':</span>' + sik;
+    btn.onclick = () => cevapSec(i);
+    container.appendChild(btn);
   });
 
-  // Open elevator doors
-  document.getElementById('elevatorDoors').classList.add('doors-open');
-  document.getElementById('elevatorStatus').textContent = 'Cevabını bekliyorum...';
+  // Animate question box
+  const qb = document.getElementById('questionBox');
+  qb.style.animation = 'none';
+  qb.offsetHeight;
+  qb.style.animation = 'slideUp 0.4s ease-out';
 
-  // Animate question area
-  const qa = document.getElementById('questionArea');
-  qa.style.animation = 'none';
-  qa.offsetHeight; // reflow
-  qa.style.animation = 'slideUp 0.5s ease-out';
+  timerBaslat();
 }
 
 /* ================================================================
-   ✅❌ CEVAP KONTROLÜ
-================================================================ */
+   CEVAP KONTROLU
+   ================================================================ */
 
-function cevapKontrol(secim) {
+function cevapSec(secim) {
+  if (cevapVerildi) return;
+  cevapVerildi = true;
+  timerDurdur();
+
   const s = karisikSorular[mevcutSoru];
   const butonlar = document.querySelectorAll('.option-btn');
 
-  // Disable all buttons
+  // Show selected state briefly
+  butonlar[secim].classList.add('selected');
   butonlar.forEach(b => b.disabled = true);
 
-  if (secim === s.dogruCevap) {
-    // ✅ DOĞRU CEVAP
-    butonlar[secim].classList.add('correct');
-    combo++;
-    if (combo > maxCombo) maxCombo = combo;
-    dogruSayisi++;
+  // Reveal answer after a short delay (suspense!)
+  setTimeout(() => {
+    butonlar[secim].classList.remove('selected');
 
-    const comboPuan = 100 + (combo - 1) * 25;
-    puan += comboPuan;
+    if (secim === s.dogruCevap) {
+      // DOGRU CEVAP
+      butonlar[secim].classList.add('correct');
+      dogruSayisi++;
 
-    asansorYukariAnimasyon();
+      setTimeout(() => {
+        dogruPopupGoster();
+      }, 600);
 
-    setTimeout(() => {
-      document.getElementById('correctIcon').textContent =
-        combo >= 3 ? '🔥' : '🎉';
-      document.getElementById('correctTitle').textContent =
-        combo >= 3 ? 'Müthiş! x' + combo + ' Combo!' : 'Doğru Cevap!';
-      document.getElementById('correctSubtitle').textContent =
-        '+' + comboPuan + ' puan! ' + katlar[Math.min(mevcutKat, katlar.length - 1)].isim + ' katına çıktın!';
-      document.getElementById('correctOverlay').classList.add('active');
-      katGuncelle();
-    }, 800);
+    } else {
+      // YANLIS CEVAP
+      butonlar[secim].classList.add('wrong');
+      butonlar[s.dogruCevap].classList.add('correct');
+      can--;
+      yanlisSayisi++;
+      canGuncelle();
 
-  } else {
-    // ❌ YANLIŞ CEVAP
-    butonlar[secim].classList.add('wrong');
-    butonlar[s.dogruCevap].classList.add('correct');
-    combo = 0;
-    can--;
-    yanlisSayisi++;
+      setTimeout(() => {
+        yanlisPopupGoster(s, "Yanlis cevap!");
+      }, 800);
+    }
+  }, 1200);
+}
 
-    asansorSallaAnimasyon();
+/* ================================================================
+   POPUP'LAR
+   ================================================================ */
 
-    setTimeout(() => {
-      // Show book note popup
-      const note = document.getElementById('bookNoteContent');
-      note.innerHTML = `
-        <div class="book-note-header">
-          <span class="icon">📖</span>
-          <h3>Kitaptan Not</h3>
-        </div>
-        <div class="book-note-term">📌 ${s.terim}</div>
-        <div class="book-note-text">${s.kitapAciklamasi}</div>
-        <button class="book-note-btn" onclick="closeBookNote()">
-          ${can > 0 ? 'Öğrendim, Devam Et ➡️' : 'Sonuçları Gör 📊'}
-        </button>
-      `;
-      document.getElementById('bookNoteOverlay').classList.add('active');
-      katGuncelle();
-    }, 1000);
+function dogruPopupGoster() {
+  const kazanilan = basamaklar[mevcutSoru].amount;
+  const popup = document.getElementById('popupContent');
+  popup.innerHTML =
+    '<div class="popup-icon">&#x1F389;</div>' +
+    '<h3 class="correct-title">Dogru Cevap!</h3>' +
+    '<p class="popup-subtitle">Tebrikler, bir sonraki seviyeye gectin!</p>' +
+    '<div class="popup-amount">' + kazanilan + '</div>' +
+    '<button class="popup-btn" onclick="popupKapat(true)">Devam Et &#x27A1;&#xFE0F;</button>';
+  document.getElementById('popupOverlay').classList.add('active');
+}
+
+function yanlisPopupGoster(s, baslik) {
+  const popup = document.getElementById('popupContent');
+  popup.innerHTML =
+    '<div class="popup-icon">&#x1F4D6;</div>' +
+    '<h3 class="wrong-title">' + baslik + '</h3>' +
+    '<p class="popup-subtitle">Kalan can: ' + '\u2764\uFE0F'.repeat(can) + '\uD83D\uDDA4'.repeat(3 - can) + '</p>' +
+    '<div class="book-note-box">' +
+      '<div class="book-note-label">&#x1F4DA; Kitaptan Not</div>' +
+      '<div class="book-note-term">&#x1F4CC; ' + s.terim + '</div>' +
+      '<div class="book-note-text">' + s.kitapAciklamasi + '</div>' +
+    '</div>' +
+    '<button class="popup-btn" onclick="popupKapat(false)">' +
+      (can > 0 ? 'Ogrendim, Devam Et &#x27A1;&#xFE0F;' : 'Sonuclari Gor &#x1F4CA;') +
+    '</button>';
+  document.getElementById('popupOverlay').classList.add('active');
+}
+
+function popupKapat(dogruydu) {
+  document.getElementById('popupOverlay').classList.remove('active');
+  mevcutSoru++;
+  soruGoster();
+}
+
+/* ================================================================
+   JOKERLER
+   ================================================================ */
+
+function use5050() {
+  if (!joker5050 || cevapVerildi) return;
+  joker5050 = false;
+  document.getElementById('btn5050').disabled = true;
+
+  const s = karisikSorular[mevcutSoru];
+  const yanlisler = [];
+  for (let i = 0; i < 4; i++) {
+    if (i !== s.dogruCevap) yanlisler.push(i);
   }
+
+  // Shuffle and pick 2 wrong answers to eliminate
+  for (let i = yanlisler.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [yanlisler[i], yanlisler[j]] = [yanlisler[j], yanlisler[i]];
+  }
+
+  const elenenler = yanlisler.slice(0, 2);
+  elenenler.forEach(idx => {
+    const btn = document.getElementById('opt-' + idx);
+    btn.classList.add('eliminated');
+    btn.disabled = true;
+  });
 }
 
-/* ================================================================
-   🔲 POPUP KAPATMA
-================================================================ */
+function usePas() {
+  if (!jokerPas || cevapVerildi) return;
+  jokerPas = false;
+  document.getElementById('btnPas').disabled = true;
 
-function closeBookNote() {
-  document.getElementById('bookNoteOverlay').classList.remove('active');
+  timerDurdur();
+  cevapVerildi = true;
   mevcutSoru++;
   soruGoster();
 }
 
-function closeCorrectPopup() {
-  document.getElementById('correctOverlay').classList.remove('active');
-  mevcutSoru++;
-  soruGoster();
-}
-
 /* ================================================================
-   🏁 OYUN BİTİŞİ
-================================================================ */
+   OYUN BITISI
+   ================================================================ */
 
 function oyunBitir() {
-  const toplam = karisikSorular.length;
-  const basariOrani = Math.round((dogruSayisi / toplam) * 100);
-  let emoji, baslik;
+  timerDurdur();
 
-  if (can <= 0) {
-    emoji = '💼';
-    baslik = 'Bir Dahaki Sefere!';
-  } else if (basariOrani === 100) {
-    emoji = '🦄';
-    baslik = 'Unicorn Seviyesi!';
-  } else if (basariOrani >= 60) {
-    emoji = '🚀';
-    baslik = 'Harika Yolculuk!';
-  } else {
-    emoji = '🌱';
-    baslik = 'İyi Başlangıç!';
+  const toplam = karisikSorular.length;
+  const basari = toplam > 0 ? Math.round((dogruSayisi / toplam) * 100) : 0;
+
+  // Kazanilan odul: son dogru cevabin odulu
+  let kazanilanOdul = "0 TL";
+  if (dogruSayisi > 0) {
+    kazanilanOdul = basamaklar[dogruSayisi - 1].amount;
   }
 
-  document.getElementById('endEmoji').textContent = emoji;
-  document.getElementById('endTitle').textContent = baslik;
-  document.getElementById('finalScore').textContent = '⭐ Toplam Puan: ' + puan;
+  let icon, baslik;
+  if (dogruSayisi === toplam) {
+    icon = '\uD83C\uDFC6';
+    baslik = 'VC Milyoneri Oldun!';
+  } else if (basari >= 60) {
+    icon = '\uD83D\uDE80';
+    baslik = 'Harika Performans!';
+  } else if (can <= 0) {
+    icon = '\uD83D\uDCBC';
+    baslik = 'Bir Dahaki Sefere!';
+  } else {
+    icon = '\uD83C\uDF31';
+    baslik = 'Iyi Baslangic!';
+  }
 
-  document.getElementById('statsGrid').innerHTML = `
-    <div class="stat-card">
-      <div class="value">${dogruSayisi}/${toplam}</div>
-      <div class="label">Doğru Cevap</div>
-    </div>
-    <div class="stat-card">
-      <div class="value">${maxCombo}x</div>
-      <div class="label">Maks Combo</div>
-    </div>
-    <div class="stat-card">
-      <div class="value">${basariOrani}%</div>
-      <div class="label">Başarı Oranı</div>
-    </div>
-  `;
+  document.getElementById('endIcon').textContent = icon;
+  document.getElementById('endTitle').textContent = baslik;
+  document.getElementById('endAmount').textContent = 'Kazanilan: ' + kazanilanOdul;
+
+  document.getElementById('endStats').innerHTML =
+    '<div class="end-stat"><div class="val">' + dogruSayisi + '/' + toplam + '</div><div class="lbl">Dogru Cevap</div></div>' +
+    '<div class="end-stat"><div class="val">' + (3 - can) + '</div><div class="lbl">Kullanilan Can</div></div>' +
+    '<div class="end-stat"><div class="val">%' + basari + '</div><div class="lbl">Basari Orani</div></div>';
 
   ekranGoster('endScreen');
 }
-
 </script>
+
 </body>
 </html>
