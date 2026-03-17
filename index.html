@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚀 Startup Yolculuğu - VC Terminoloji Oyunu</title>
+<style>
+  /* ============================================
+     STARTUP YOLCULUĞU - VC TERMİNOLOJİ OYUNU
+     Tüm stiller bu <style> bloğu içindedir.
+  ============================================ */
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(60px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+    20%, 40%, 60%, 80% { transform: translateX(6px); }
+  }
+
+  @keyframes elevatorMove {
+    0% { transform: translateY(0); }
+    30% { transform: translateY(-18px); }
+    60% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+  }
+
+  @keyframes elevatorShake {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    15% { transform: translateX(-5px) rotate(-1deg); }
+    30% { transform: translateX(5px) rotate(1deg); }
+    45% { transform: translateX(-4px) rotate(-0.5deg); }
+    60% { transform: translateX(4px) rotate(0.5deg); }
+    75% { transform: translateX(-2px) rotate(0deg); }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); }
+    50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.6); }
+  }
+
+  @keyframes confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-200px) rotate(720deg); opacity: 0; }
+  }
+
+  @keyframes starPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes doorOpen {
+    0% { width: 45%; }
+    100% { width: 5%; }
+  }
+
+  @keyframes doorClose {
+    0% { width: 5%; }
+    100% { width: 45%; }
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e2e8f0;
+    overflow: hidden;
+  }
+
+  .game-container {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    position: relative;
+  }
+
+  /* ===== START SCREEN ===== */
+  .screen { display: none; animation: fadeIn 0.5s ease-out; }
+  .screen.active { display: block; }
+
+  .start-screen {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .start-screen h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #f59e0b, #ef4444, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .start-screen .subtitle {
+    font-size: 1.1em;
+    color: #94a3b8;
+    margin-bottom: 40px;
+  }
+
+  .elevator-preview {
+    font-size: 80px;
+    margin: 20px 0;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .start-btn {
+    padding: 18px 50px;
+    font-size: 1.3em;
+    font-weight: bold;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    animation: pulseGlow 2s infinite;
+  }
+
+  .start-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+  }
+
+  .instructions {
+    margin-top: 30px;
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    text-align: left;
+    font-size: 0.95em;
+    line-height: 1.8;
+    color: #cbd5e1;
+  }
+
+  .instructions span { font-weight: bold; color: #a5b4fc; }
+
+  /* ===== GAME SCREEN ===== */
+  .game-screen { position: relative; }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+  }
+
+  .lives { font-size: 1.4em; letter-spacing: 4px; }
+  .floor-badge {
+    padding: 6px 16px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9em;
+  }
+  .score-display { font-size: 1.1em; font-weight: bold; color: #fbbf24; }
+  .combo-display { font-size: 0.85em; color: #34d399; margin-left: 8px; }
+
+  /* ===== ELEVATOR AREA ===== */
+  .elevator-wrapper {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 20px;
+    gap: 12px;
+    min-height: 120px;
+  }
+
+  .floor-indicator {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 60px;
+    padding: 10px 0;
+  }
+
+  .floor-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: all 0.5s;
+    position: relative;
+  }
+
+  .floor-dot.active {
+    background: #fbbf24;
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+  }
+
+  .floor-dot.passed {
+    background: #34d399;
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
+  }
+
+  .floor-dot::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.65em;
+    color: #94a3b8;
+    white-space: nowrap;
+  }
+
+  .elevator-box {
+    flex: 1;
+    background: linear-gradient(180deg, #1e1b4b, #312e81);
+    border: 2px solid #4338ca;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s;
+  }
+
+  .elevator-box.moving { animation: elevatorMove 0.8s ease-in-out; }
+  .elevator-box.shaking { animation: elevatorShake 0.6s ease-in-out; }
+
+  .elevator-doors {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .door-left, .door-right {
+    width: 45%;
+    height: 100%;
+    background: linear-gradient(180deg, #1e1b4b, #0f0a2e);
+    border: 1px solid #4338ca;
+    transition: width 0.8s ease-in-out;
+  }
+  .door-left { border-radius: 16px 0 0 16px; }
+  .door-right { border-radius: 0 16px 16px 0; margin-left: auto; }
+
+  .doors-open .door-left,
+  .doors-open .door-right { width: 5%; }
+
+  .elevator-emoji {
+    font-size: 50px;
+    margin-bottom: 8px;
+    z-index: 1;
+  }
+
+  .elevator-status {
+    font-size: 0.95em;
+    color: #a5b4fc;
+    font-weight: 500;
+    z-index: 1;
+  }
+
+  /* ===== QUESTION AREA ===== */
+  .question-area {
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.08);
+    animation: slideUp 0.5s ease-out;
+  }
+
+  .question-number {
+    font-size: 0.8em;
+    color: #8b5cf6;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .question-text {
+    font-size: 1.25em;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    color: #f1f5f9;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .option-btn {
+    padding: 16px 20px;
+    font-size: 1em;
+    border: 2px solid rgba(99, 102, 241, 0.3);
+    border-radius: 14px;
+    background: rgba(99, 102, 241, 0.08);
+    color: #e2e8f0;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: left;
+    line-height: 1.4;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.15);
+  }
+
+  .option-btn:disabled { cursor: not-allowed; opacity: 0.85; }
+
+  .option-btn.correct {
+    border-color: #34d399;
+    background: rgba(52, 211, 153, 0.2);
+    color: #6ee7b7;
+  }
+
+  .option-btn.wrong {
+    border-color: #f87171;
+    background: rgba(248, 113, 113, 0.15);
+    color: #fca5a5;
+    animation: shake 0.5s;
+  }
+
+  .option-letter {
+    display: inline-block;
+    width: 28px; height: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 8px;
+    background: rgba(99, 102, 241, 0.2);
+    margin-right: 10px;
+    font-weight: bold;
+    font-size: 0.85em;
+    vertical-align: middle;
+  }
+
+  /* ===== BOOK NOTE POPUP ===== */
+  .overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .overlay.active { display: flex; }
+
+  .book-note {
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    border: 2px solid #6366f1;
+    border-radius: 24px;
+    padding: 35px;
+    max-width: 550px;
+    width: 90%;
+    animation: popIn 0.4s ease-out;
+    position: relative;
+  }
+
+  .book-note-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .book-note-header .icon { font-size: 30px; }
+
+  .book-note-header h3 {
+    font-size: 1.2em;
+    color: #fbbf24;
+  }
+
+  .book-note-term {
+    font-size: 1.05em;
+    font-weight: bold;
+    color: #a5b4fc;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    background: rgba(99, 102, 241, 0.12);
+    border-radius: 10px;
+    border-left: 4px solid #6366f1;
+  }
+
+  .book-note-text {
+    font-size: 0.95em;
+    line-height: 1.8;
+    color: #cbd5e1;
+  }
+
+  .book-note-btn {
+    margin-top: 22px;
+    padding: 14px 35px;
+    font-size: 1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+  }
+
+  .book-note-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+  }
+
+  /* correct answer popup */
+  .correct-popup {
+    text-align: center;
+  }
+  .correct-popup .icon { font-size: 60px; margin-bottom: 10px; }
+  .correct-popup h3 { color: #34d399; font-size: 1.4em; margin-bottom: 8px; }
+  .correct-popup p { color: #94a3b8; }
+
+  /* ===== END SCREEN ===== */
+  .end-screen { text-align: center; padding: 40px 20px; }
+
+  .end-emoji { font-size: 80px; margin-bottom: 15px; animation: float 3s ease-in-out infinite; }
+
+  .end-screen h2 {
+    font-size: 2em;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .end-screen .final-score {
+    font-size: 1.5em;
+    color: #a5b4fc;
+    margin-bottom: 25px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+
+  .stat-card {
+    background: rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 20px 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .stat-card .value { font-size: 1.8em; font-weight: bold; color: #fbbf24; }
+  .stat-card .label { font-size: 0.8em; color: #94a3b8; margin-top: 4px; }
+
+  .restart-btn {
+    padding: 16px 45px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .restart-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+  }
+
+  /* ===== PROGRESS BAR ===== */
+  .progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #fbbf24);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .start-screen h1 { font-size: 1.8em; }
+    .question-text { font-size: 1.05em; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .elevator-wrapper { flex-direction: column; }
+    .floor-indicator { flex-direction: row; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="game-container">
+
+  <!-- ========== START SCREEN ========== -->
+  <div id="startScreen" class="screen start-screen active">
+    <div class="elevator-preview">🏢</div>
+    <h1>Startup Yolculuğu</h1>
+    <p class="subtitle">VC Terminoloji Oyunu</p>
+    <button class="start-btn" onclick="startGame()">🚀 Yolculuğa Başla</button>
+    <div class="instructions">
+      <p>🎯 <span>Amaç:</span> Garajdan başla, asansörle Unicorn katına çık!</p>
+      <p>✅ <span>Doğru cevap:</span> Bir kat yukarı çık ve puan kazan.</p>
+      <p>❌ <span>Yanlış cevap:</span> Bir can kaybet ama kitaptan öğren!</p>
+      <p>❤️ <span>3 canın</span> var. Canların biterse oyun biter.</p>
+      <p>🔥 <span>Combo:</span> Art arda doğru cevaplarla bonus puan kazan!</p>
+    </div>
+  </div>
+
+  <!-- ========== GAME SCREEN ========== -->
+  <div id="gameScreen" class="screen game-screen">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="lives" id="livesDisplay">❤️❤️❤️</div>
+      <div class="floor-badge" id="floorBadge">📍 Garaj</div>
+      <div>
+        <span class="score-display" id="scoreDisplay">⭐ 0</span>
+        <span class="combo-display" id="comboDisplay"></span>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+
+    <!-- Elevator Area -->
+    <div class="elevator-wrapper">
+      <div class="floor-indicator" id="floorIndicator">
+        <!-- Filled by JS -->
+      </div>
+      <div class="elevator-box" id="elevatorBox">
+        <div class="elevator-doors" id="elevatorDoors">
+          <div class="door-left"></div>
+          <div class="door-right"></div>
+        </div>
+        <div class="elevator-emoji" id="elevatorEmoji">🧑‍💼</div>
+        <div class="elevator-status" id="elevatorStatus">Hazır mısın?</div>
+      </div>
+    </div>
+
+    <!-- Question Area -->
+    <div class="question-area" id="questionArea">
+      <div class="question-number" id="questionNumber"></div>
+      <div class="question-text" id="questionText"></div>
+      <div class="options-grid" id="optionsGrid"></div>
+    </div>
+  </div>
+
+  <!-- ========== END SCREEN ========== -->
+  <div id="endScreen" class="screen end-screen">
+    <div class="end-emoji" id="endEmoji">🦄</div>
+    <h2 id="endTitle">Tebrikler!</h2>
+    <p class="final-score" id="finalScore"></p>
+    <div class="stats-grid" id="statsGrid"></div>
+    <button class="restart-btn" onclick="restartGame()">🔄 Tekrar Oyna</button>
+  </div>
+
+  <!-- ========== BOOK NOTE POPUP ========== -->
+  <div class="overlay" id="bookNoteOverlay">
+    <div class="book-note" id="bookNoteContent">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+
+  <!-- ========== CORRECT POPUP ========== -->
+  <div class="overlay" id="correctOverlay">
+    <div class="book-note correct-popup">
+      <div class="icon" id="correctIcon">🎉</div>
+      <h3 id="correctTitle">Doğru Cevap!</h3>
+      <p id="correctSubtitle">Harika, bir kat yukarı!</p>
+      <button class="book-note-btn" onclick="closeCorrectPopup()">Devam Et ➡️</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ================================================================
+   STARTUP YOLCULUĞU - VC TERMİNOLOJİ OYUNU
+   Tüm oyun mantığı bu <script> bloğu içindedir.
+================================================================ */
+
+/* ================================================================
+   📚 SORU VERİ YAPISI (DATA STRUCTURE)
+   ================================================================
+   Yeni soru eklemek çok kolay! Aşağıdaki diziye aynı formatta
+   yeni bir obje ekleyin:
+
+   {
+     soru: "Soru metni buraya",
+     siklar: ["A şıkkı", "B şıkkı", "C şıkkı", "D şıkkı"],
+     dogruCevap: 0,   // 0=A, 1=B, 2=C, 3=D (sıfırdan başlar)
+     terim: "Terimin Adı",
+     kitapAciklamasi: "Kitaptaki açıklama metni buraya gelir..."
+   }
+
+   dogruCevap alanı, siklar dizisindeki doğru cevabın
+   indeksini (0'dan başlayarak) belirtir.
+   ================================================================ */
+
+const sorular = [
+  {
+    soru: "Bir startup'ın piyasa değerinin 1 milyar doları aşması durumunda ona ne ad verilir?",
+    siklar: [
+      "Unicorn 🦄",
+      "Centaur 🐴",
+      "Decacorn 🌟",
+      "Gazelle 🦌"
+    ],
+    dogruCevap: 0,
+    terim: "Unicorn (Tek Boynuzlu At)",
+    kitapAciklamasi: "Unicorn, değerlemesi 1 milyar doların üzerinde olan özel (halka açılmamış) girişim şirketlerine verilen isimdir. Bu terim ilk kez 2013 yılında yatırımcı Aileen Lee tarafından kullanılmıştır. Terimin 'efsanevi' bir yaratığa atıfta bulunması, bu değerlemeye ulaşmanın nadir ve olağanüstü bir başarı olduğunu vurgular. Decacorn ise 10 milyar doları aşan şirketler için kullanılır."
+  },
+  {
+    soru: "Bir yatırımcının, yatırım yaptığı şirketin bir sonraki yatırım turunda, mevcut hissesini korumak için ek yatırım yapma hakkına ne denir?",
+    siklar: [
+      "Liquidation Preference",
+      "Pro-Rata Hakkı",
+      "Anti-Dilution",
+      "Drag-Along Hakkı"
+    ],
+    dogruCevap: 1,
+    terim: "Pro-Rata Hakkı",
+    kitapAciklamasi: "Pro-Rata hakkı, mevcut yatırımcılara gelecekteki fonlama turlarında sahip oldukları yüzdesel paylarını koruyabilmeleri için orantılı miktarda ek yatırım yapma imkânı tanır. Bu hak, erken aşama yatırımcılar için son derece değerlidir çünkü başarılı şirketlerde paylarının seyrelmesini (dilution) önler. Yatırımcılar bu hakkı term sheet müzakerelerinde sıklıkla talep eder."
+  },
+  {
+    soru: "Bir startup'ın henüz gelir elde etmeden, sadece fikir ve ekip aşamasındayken aldığı ilk yatırım turuna ne ad verilir?",
+    siklar: [
+      "Series A",
+      "Bridge Round",
+      "Pre-Seed / Seed",
+      "Mezzanine"
+    ],
+    dogruCevap: 2,
+    terim: "Pre-Seed / Seed (Tohum Yatırımı)",
+    kitapAciklamasi: "Pre-Seed ve Seed turları, bir startup'ın yaşam döngüsündeki en erken aşama yatırımlardır. Bu aşamada genellikle ortada somut bir ürün yoktur; yatırımcılar kurucunun vizyonuna, ekibin kalitesine ve pazar fırsatının büyüklüğüne güvenerek yatırım yapar. Tohum yatırımı genellikle 100 bin ile 2 milyon dolar arasında değişir ve melek yatırımcılar (angel investors) veya erken aşama VC fonları tarafından sağlanır."
+  },
+  {
+    soru: "Bir şirketin tasfiye (satış veya kapanma) durumunda, yatırımcıların diğer hissedarlardan önce paralarını geri alma hakkına ne denir?",
+    siklar: [
+      "Vesting",
+      "Cap Table",
+      "Burn Rate",
+      "Liquidation Preference"
+    ],
+    dogruCevap: 3,
+    terim: "Liquidation Preference (Tasfiye Tercihi)",
+    kitapAciklamasi: "Liquidation Preference, yatırımcılara şirketin satılması, birleşmesi veya kapanması durumunda yatırdıkları parayı (genellikle 1x veya daha fazla çarpanla) diğer hissedarlardan önce geri alma önceliği verir. Bu mekanizma yatırımcıyı aşağı yönlü risklere (downside risk) karşı korur. Örneğin, 1x non-participating liquidation preference ile 5 milyon dolar yatıran bir yatırımcı, şirket satıldığında ilk 5 milyon doları almayı garanti eder."
+  },
+  {
+    soru: "Bir startup'ın aylık bazda ne kadar nakit harcadığını gösteren ve 'kaç ay daha hayatta kalabileceğini' hesaplamaya yarayan metrik hangisidir?",
+    siklar: [
+      "Burn Rate 🔥",
+      "Churn Rate",
+      "Runway",
+      "Gross Margin"
+    ],
+    dogruCevap: 0,
+    terim: "Burn Rate (Yakma Oranı)",
+    kitapAciklamasi: "Burn Rate, bir startup'ın aylık bazda harcadığı net nakit miktarını ifade eder. Gross Burn Rate tüm aylık harcamaları gösterirken, Net Burn Rate gelirler düşüldükten sonra kalan nakit kaybını gösterir. Bu metrik, startup'ın 'Runway'ini (pisti) hesaplamak için kullanılır: Mevcut nakit / Aylık Burn Rate = Kalan ay sayısı. Örneğin, bankada 1.2 milyon dolar olan ve ayda 100 bin dolar harcayan bir startup'ın runway'i 12 aydır."
+  }
+];
+
+/* ================================================================
+   🎮 OYUN DEĞİŞKENLERİ
+================================================================ */
+
+const katlar = [
+  { isim: "Garaj 🏠", emoji: "🧑‍💻" },
+  { isim: "Seed 🌱", emoji: "🌱" },
+  { isim: "Series A 📈", emoji: "📈" },
+  { isim: "Series B 🚀", emoji: "🚀" },
+  { isim: "Unicorn 🦄", emoji: "🦄" },
+  { isim: "IPO 🔔", emoji: "🔔" }
+];
+
+let mevcutSoru = 0;
+let can = 3;
+let puan = 0;
+let combo = 0;
+let maxCombo = 0;
+let dogruSayisi = 0;
+let yanlisSayisi = 0;
+let mevcutKat = 0;
+let karisikSorular = [];
+
+/* ================================================================
+   🔧 YARDIMCI FONKSİYONLAR
+================================================================ */
+
+function soruKaristir(arr) {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function ekranGoster(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ================================================================
+   🚀 OYUN BAŞLATMA
+================================================================ */
+
+function startGame() {
+  mevcutSoru = 0;
+  can = 3;
+  puan = 0;
+  combo = 0;
+  maxCombo = 0;
+  dogruSayisi = 0;
+  yanlisSayisi = 0;
+  mevcutKat = 0;
+  karisikSorular = soruKaristir(sorular);
+
+  ekranGoster('gameScreen');
+  katGuncelle();
+  soruGoster();
+}
+
+function restartGame() {
+  ekranGoster('startScreen');
+}
+
+/* ================================================================
+   🏢 KAT VE ASANSÖR YÖNETİMİ
+================================================================ */
+
+function katGuncelle() {
+  // Lives
+  document.getElementById('livesDisplay').textContent = '❤️'.repeat(can) + '🖤'.repeat(3 - can);
+
+  // Floor badge
+  const kat = katlar[Math.min(mevcutKat, katlar.length - 1)];
+  document.getElementById('floorBadge').textContent = '📍 ' + kat.isim;
+
+  // Elevator emoji
+  document.getElementById('elevatorEmoji').textContent = kat.emoji;
+
+  // Score
+  document.getElementById('scoreDisplay').textContent = '⭐ ' + puan;
+
+  // Combo
+  const comboEl = document.getElementById('comboDisplay');
+  comboEl.textContent = combo > 1 ? '🔥 x' + combo + ' Combo!' : '';
+
+  // Progress bar
+  const progress = (mevcutSoru / karisikSorular.length) * 100;
+  document.getElementById('progressBar').style.width = progress + '%';
+
+  // Floor indicators
+  const indicator = document.getElementById('floorIndicator');
+  indicator.innerHTML = '';
+  for (let i = katlar.length - 1; i >= 0; i--) {
+    const dot = document.createElement('div');
+    dot.className = 'floor-dot';
+    if (i === mevcutKat) dot.classList.add('active');
+    if (i < mevcutKat) dot.classList.add('passed');
+    dot.setAttribute('data-label', katlar[i].isim);
+    indicator.appendChild(dot);
+  }
+}
+
+function asansorYukariAnimasyon() {
+  const box = document.getElementById('elevatorBox');
+  const doors = document.getElementById('elevatorDoors');
+  const status = document.getElementById('elevatorStatus');
+
+  // Close doors
+  doors.classList.remove('doors-open');
+  status.textContent = 'Yukarı çıkılıyor...';
+
+  setTimeout(() => {
+    box.classList.add('moving');
+    mevcutKat = Math.min(mevcutKat + 1, katlar.length - 1);
+    katGuncelle();
+  }, 400);
+
+  setTimeout(() => {
+    box.classList.remove('moving');
+    doors.classList.add('doors-open');
+    status.textContent = katlar[Math.min(mevcutKat, katlar.length - 1)].isim + ' katına hoş geldiniz!';
+  }, 1200);
+}
+
+function asansorSallaAnimasyon() {
+  const box = document.getElementById('elevatorBox');
+  const status = document.getElementById('elevatorStatus');
+
+  box.classList.add('shaking');
+  status.textContent = '⚠️ Asansör sallanıyor!';
+
+  setTimeout(() => {
+    box.classList.remove('shaking');
+    status.textContent = 'Devam edelim...';
+  }, 700);
+}
+
+/* ================================================================
+   ❓ SORU GÖSTERİMİ
+================================================================ */
+
+function soruGoster() {
+  if (mevcutSoru >= karisikSorular.length || can <= 0) {
+    oyunBitir();
+    return;
+  }
+
+  const s = karisikSorular[mevcutSoru];
+
+  document.getElementById('questionNumber').textContent =
+    'SORU ' + (mevcutSoru + 1) + ' / ' + karisikSorular.length;
+  document.getElementById('questionText').textContent = s.soru;
+
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  const harfler = ['A', 'B', 'C', 'D'];
+
+  s.siklar.forEach((sik, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = '<span class="option-letter">' + harfler[i] + '</span>' + sik;
+    btn.onclick = () => cevapKontrol(i);
+    grid.appendChild(btn);
+  });
+
+  // Open elevator doors
+  document.getElementById('elevatorDoors').classList.add('doors-open');
+  document.getElementById('elevatorStatus').textContent = 'Cevabını bekliyorum...';
+
+  // Animate question area
+  const qa = document.getElementById('questionArea');
+  qa.style.animation = 'none';
+  qa.offsetHeight; // reflow
+  qa.style.animation = 'slideUp 0.5s ease-out';
+}
+
+/* ================================================================
+   ✅❌ CEVAP KONTROLÜ
+================================================================ */
+
+function cevapKontrol(secim) {
+  const s = karisikSorular[mevcutSoru];
+  const butonlar = document.querySelectorAll('.option-btn');
+
+  // Disable all buttons
+  butonlar.forEach(b => b.disabled = true);
+
+  if (secim === s.dogruCevap) {
+    // ✅ DOĞRU CEVAP
+    butonlar[secim].classList.add('correct');
+    combo++;
+    if (combo > maxCombo) maxCombo = combo;
+    dogruSayisi++;
+
+    const comboPuan = 100 + (combo - 1) * 25;
+    puan += comboPuan;
+
+    asansorYukariAnimasyon();
+
+    setTimeout(() => {
+      document.getElementById('correctIcon').textContent =
+        combo >= 3 ? '🔥' : '🎉';
+      document.getElementById('correctTitle').textContent =
+        combo >= 3 ? 'Müthiş! x' + combo + ' Combo!' : 'Doğru Cevap!';
+      document.getElementById('correctSubtitle').textContent =
+        '+' + comboPuan + ' puan! ' + katlar[Math.min(mevcutKat, katlar.length - 1)].isim + ' katına çıktın!';
+      document.getElementById('correctOverlay').classList.add('active');
+      katGuncelle();
+    }, 800);
+
+  } else {
+    // ❌ YANLIŞ CEVAP
+    butonlar[secim].classList.add('wrong');
+    butonlar[s.dogruCevap].classList.add('correct');
+    combo = 0;
+    can--;
+    yanlisSayisi++;
+
+    asansorSallaAnimasyon();
+
+    setTimeout(() => {
+      // Show book note popup
+      const note = document.getElementById('bookNoteContent');
+      note.innerHTML = `
+        <div class="book-note-header">
+          <span class="icon">📖</span>
+          <h3>Kitaptan Not</h3>
+        </div>
+        <div class="book-note-term">📌 ${s.terim}</div>
+        <div class="book-note-text">${s.kitapAciklamasi}</div>
+        <button class="book-note-btn" onclick="closeBookNote()">
+          ${can > 0 ? 'Öğrendim, Devam Et ➡️' : 'Sonuçları Gör 📊'}
+        </button>
+      `;
+      document.getElementById('bookNoteOverlay').classList.add('active');
+      katGuncelle();
+    }, 1000);
+  }
+}
+
+/* ================================================================
+   🔲 POPUP KAPATMA
+================================================================ */
+
+function closeBookNote() {
+  document.getElementById('bookNoteOverlay').classList.remove('active');
+  mevcutSoru++;
+  soruGoster();
+}
+
+function closeCorrectPopup() {
+  document.getElementById('correctOverlay').classList.remove('active');
+  mevcutSoru++;
+  soruGoster();
+}
+
+/* ================================================================
+   🏁 OYUN BİTİŞİ
+================================================================ */
+
+function oyunBitir() {
+  const toplam = karisikSorular.length;
+  const basariOrani = Math.round((dogruSayisi / toplam) * 100);
+  let emoji, baslik;
+
+  if (can <= 0) {
+    emoji = '💼';
+    baslik = 'Bir Dahaki Sefere!';
+  } else if (basariOrani === 100) {
+    emoji = '🦄';
+    baslik = 'Unicorn Seviyesi!';
+  } else if (basariOrani >= 60) {
+    emoji = '🚀';
+    baslik = 'Harika Yolculuk!';
+  } else {
+    emoji = '🌱';
+    baslik = 'İyi Başlangıç!';
+  }
+
+  document.getElementById('endEmoji').textContent = emoji;
+  document.getElementById('endTitle').textContent = baslik;
+  document.getElementById('finalScore').textContent = '⭐ Toplam Puan: ' + puan;
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="value">${dogruSayisi}/${toplam}</div>
+      <div class="label">Doğru Cevap</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">${maxCombo}x</div>
+      <div class="label">Maks Combo</div>
+    </div>
+    <div class="stat-card">
+      <div class="value">${basariOrani}%</div>
+      <div class="label">Başarı Oranı</div>
+    </div>
+  `;
+
+  ekranGoster('endScreen');
+}
+
+</script>
+</body>
+</html>
