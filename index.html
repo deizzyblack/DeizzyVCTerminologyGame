@@ -647,7 +647,10 @@
   <h1 class="start-title">Kim VC Milyoneri Olmak Ister?</h1>
   <p class="start-subtitle">Venture Capital Terminoloji Oyunu</p>
 
-  <button class="start-btn" onclick="startGame()">OYUNA BASLA</button>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;">
+    <button class="start-btn" onclick="startGame(15)">HIZLI OYUN (15 Soru)</button>
+    <button class="start-btn" onclick="startGame(0)" style="background:linear-gradient(180deg,rgba(80,200,120,0.2),rgba(80,200,120,0.1));border-color:#50c878;color:#50c878;">TUM SORULAR (50 Soru)</button>
+  </div>
 
   <div class="rules-box">
     <p><strong>Amac:</strong> VC sorularini dogru cevaplayarak para odullerini kazan!</p>
@@ -655,6 +658,7 @@
     <p><strong>Yanlis cevap:</strong> 3 canin var. Can kaybetmeden once terimi ogren!</p>
     <p><strong>Jokerler:</strong> 50:50 (2 yanlis sik elenir) | Pas Gec (soruyu atla)</p>
     <p><strong>Zamanlayici:</strong> Her soru icin 30 saniye suren var!</p>
+    <p><strong>Kaynak:</strong> Venture Capital Operating Textbook (VCOT) - 20 bolum, 50 soru</p>
   </div>
 </div>
 
