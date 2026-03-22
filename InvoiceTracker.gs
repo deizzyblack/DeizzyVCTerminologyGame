@@ -101,7 +101,9 @@ const CONFIG = {
   // Limitler: 15 istek/dakika, 1M token/gün (fatura tarama için fazlasıyla yeterli)
   GEMINI_API_KEY: "AIzaSyD9m8-n5DQCVaw1qDdKhcWuUHChfpy9fKo",  // ← BURAYA API KEY'İNİ YAPIŞTIR
   GEMINI_MODEL: "gemini-2.0-flash",
-  GEMINI_ENABLED: true  // false yaparak AI'yi devre dışı bırakabilirsin
+  GEMINI_ENABLED: true, // false yaparak AI'yi devre dışı bırakabilirsin
+  GEMINI_DELAY_MS: 4500, // İstekler arası bekleme (ms) — 15 req/dk = 4 saniye arayla
+  GEMINI_MAX_CALLS: 12   // Tarama başına max Gemini çağrısı (kota koruması)
 };
 // ==================== AY BAZLI VENDOR PATTERNLERİ ====================
 const MONTHLY_VENDOR_PATTERN = {
@@ -129,14 +131,23 @@ function isGeminiAvailable() {
   return CONFIG.GEMINI_ENABLED && CONFIG.GEMINI_API_KEY && CONFIG.GEMINI_API_KEY.length > 10;
 }
 
+// Gemini çağrı sayacı — tarama başına kota kontrolü
+var _geminiCallCount = 0;
+
 /**
- * Gemini API'ye istek gönderir
+ * Gemini API'ye istek gönderir (rate limiting + retry dahil)
  * @param {string} prompt - Gönderilecek prompt
  * @param {number} maxTokens - Maksimum yanıt token sayısı (default: 1024)
  * @returns {string|null} - Gemini yanıtı veya hata durumunda null
  */
 function callGemini(prompt, maxTokens) {
   if (!isGeminiAvailable()) return null;
+
+  // Tarama başına max çağrı kontrolü
+  if (_geminiCallCount >= CONFIG.GEMINI_MAX_CALLS) {
+    Logger.log("⏸️ Gemini kota sınırı (" + CONFIG.GEMINI_MAX_CALLS + " çağrı), AI atlanıyor.");
+    return null;
+  }
 
   var maxT = maxTokens || 1024;
   var url = "https://generativelanguage.googleapis.com/v1beta/models/"
@@ -146,33 +157,57 @@ function callGemini(prompt, maxTokens) {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: {
       maxOutputTokens: maxT,
-      temperature: 0.1  // Düşük sıcaklık = tutarlı, deterministik yanıt
+      temperature: 0.1
     }
   };
 
-  try {
-    var response = UrlFetchApp.fetch(url, {
-      method: "post",
-      contentType: "application/json",
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true
-    });
+  // Rate limiting — istekler arası bekleme
+  if (_geminiCallCount > 0) {
+    Utilities.sleep(CONFIG.GEMINI_DELAY_MS || 4500);
+  }
 
-    var code = response.getResponseCode();
-    if (code !== 200) {
+  // Retry with backoff (429 hatası için)
+  var maxRetries = 2;
+  for (var attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      var response = UrlFetchApp.fetch(url, {
+        method: "post",
+        contentType: "application/json",
+        payload: JSON.stringify(payload),
+        muteHttpExceptions: true
+      });
+
+      var code = response.getResponseCode();
+
+      if (code === 200) {
+        _geminiCallCount++;
+        var json = JSON.parse(response.getContentText());
+        if (json.candidates && json.candidates[0] && json.candidates[0].content) {
+          return json.candidates[0].content.parts[0].text;
+        }
+        return null;
+      }
+
+      if (code === 429) {
+        // Rate limit — bekle ve tekrar dene
+        var waitTime = (attempt + 1) * 10000; // 10s, 20s, 30s
+        Logger.log("⏳ Gemini 429 rate limit, " + (waitTime / 1000) + "s bekleniyor... (deneme " + (attempt + 1) + "/" + (maxRetries + 1) + ")");
+        Utilities.sleep(waitTime);
+        continue;
+      }
+
+      // Diğer hatalar — tekrar deneme
       Logger.log("Gemini API hata (" + code + "): " + response.getContentText().substring(0, 200));
       return null;
-    }
 
-    var json = JSON.parse(response.getContentText());
-    if (json.candidates && json.candidates[0] && json.candidates[0].content) {
-      return json.candidates[0].content.parts[0].text;
+    } catch (e) {
+      Logger.log("Gemini API bağlantı hatası: " + e.message);
+      return null;
     }
-    return null;
-  } catch (e) {
-    Logger.log("Gemini API bağlantı hatası: " + e.message);
-    return null;
   }
+
+  Logger.log("❌ Gemini 429 hatası devam ediyor, AI atlanıyor.");
+  return null;
 }
 
 /**
@@ -256,7 +291,8 @@ function dailyScan(customDays) {
   const ss = getOrCreateSpreadsheet();
   const startTime = new Date();
 
-  log(ss, "🔍 Tarama başladı (" + scanDays + " gün)... " + (isGeminiAvailable() ? "🤖 Gemini AI aktif" : "📝 Klasik mod"));
+  _geminiCallCount = 0; // Gemini çağrı sayacını sıfırla
+  log(ss, "🔍 Tarama başladı (" + scanDays + " gün)... " + (isGeminiAvailable() ? "🤖 Gemini AI aktif (max " + CONFIG.GEMINI_MAX_CALLS + " çağrı)" : "📝 Klasik mod"));
 
   try {
     // 0. Drive'daki Excel'den bilinen faturaları senkronize et
@@ -463,8 +499,10 @@ function scanGmail(days) {
             }
           }
 
-          // PDF'de Gemini yoksa ve mail body yeterince uzunsa, body'yi analiz et
-          if (!bestGemini && isGeminiAvailable() && body.length > 100) {
+          // PDF'de Gemini yoksa VE eksik bilgi varsa, body'yi analiz et
+          // Kota tasarrufu: vendor + tutar + fatura no hepsi varsa AI'ya gerek yok
+          var hasGaps = !vendorGuess || vendorGuess === "Bilinmeyen" || !amountGuess || !invoiceNoGuess;
+          if (!bestGemini && hasGaps && isGeminiAvailable() && body.length > 100) {
             try {
               bestGemini = analyzeWithGemini(body.substring(0, 4000), from, subject);
             } catch (gemErr) {
@@ -668,9 +706,12 @@ function analyzePdf(attachment) {
     }
     var isInvoiceKeyword = matchCount >= 3;
 
-    // === GEMİNİ AI ANALİZİ (varsa) ===
+    // === GEMİNİ AI ANALİZİ (sadece belirsiz durumlar için) ===
+    // Kota tasarrufu: keyword analizi kesin sonuç verdiyse AI'ya gerek yok
     var geminiResult = null;
-    if (isGeminiAvailable()) {
+    var needsAI = isInvoiceKeyword && matchCount < 6; // Fatura gibi ama çok kesin değil
+    needsAI = needsAI || (!isInvoiceKeyword && matchCount >= 1); // Belirsiz bölge
+    if (needsAI && isGeminiAvailable()) {
       try {
         geminiResult = analyzeWithGemini(text.substring(0, 4000), "", fileName);
       } catch (gemErr) {
