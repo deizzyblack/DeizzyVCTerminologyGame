@@ -1,17 +1,20 @@
 // ============================================================
-// 212 INVOICE TRACKER v2.0 — Google Apps Script
+// 212 INVOICE TRACKER v3.0 — Google Apps Script + Gemini AI
 // ============================================================
 // Gmail'ini tarar, fatura maillerini bulur, PDF içini okur,
-// Google Sheet'e yazar, eksik vendor hatırlatması yapar,
-// ve özet bildirim maili gönderir.
+// Gemini AI ile akıllı analiz yapar, Google Sheet'e yazar,
+// eksik vendor hatırlatması yapar, özet bildirim maili gönderir.
 //
 // KURULUM:
 // 1. Google Sheet aç → Extensions → Apps Script
 // 2. Bu kodu yapıştır
 // 3. Drive API'yi aktifle (Services → Drive API → Add)
 //    ÖNEMLİ: Drive API versiyonunu v3 olarak seçin!
-// 4. setupTriggers() fonksiyonunu bir kere çalıştır
-// 5. Yetki iste → izin ver
+// 4. Gemini API key al: https://aistudio.google.com/apikey
+//    ÜCRETSİZ: gemini-2.0-flash → 15 istek/dk, 1M token/gün
+// 5. Aşağıdaki GEMINI_API_KEY alanına key'i yapıştır
+// 6. setupTriggers() fonksiyonunu bir kere çalıştır
+// 7. Yetki iste → izin ver
 // ============================================================
 // ==================== AYARLAR ====================
 const CONFIG = {
@@ -91,7 +94,15 @@ const CONFIG = {
   // Onay maili şablonu
   APPROVAL_EMAIL_TO: "", // Onay alınacak kişinin maili — setupte doldur
   APPROVAL_EMAIL_SUBJECT_PREFIX: "Ödeme Onayı — ",
-  APPROVAL_EMAIL_SIGNATURE: "" // İsim — setupte doldur
+  APPROVAL_EMAIL_SIGNATURE: "", // İsim — setupte doldur
+
+  // ==================== GEMİNİ AI AYARLARI ====================
+  // API Key: https://aistudio.google.com/apikey adresinden al (ÜCRETSİZ)
+  // Model: gemini-2.0-flash — hızlı, ücretsiz, fatura analizi için ideal
+  // Limitler: 15 istek/dakika, 1M token/gün (fatura tarama için fazlasıyla yeterli)
+  GEMINI_API_KEY: "",  // ← BURAYA API KEY'İNİ YAPIŞTIR
+  GEMINI_MODEL: "gemini-2.0-flash",
+  GEMINI_ENABLED: true  // false yaparak AI'yi devre dışı bırakabilirsin
 };
 // ==================== AY BAZLI VENDOR PATTERNLERİ ====================
 const MONTHLY_VENDOR_PATTERN = {
@@ -110,6 +121,133 @@ const MONTHLY_VENDOR_PATTERN = {
 };
 // Tüm bilinen vendor isimleri (pattern'den çıkarılmış)
 const ALL_KNOWN_VENDORS = [...new Set(Object.values(MONTHLY_VENDOR_PATTERN).flat())];
+// ==================== GEMİNİ AI FONKSİYONLARI ====================
+
+/**
+ * Gemini AI kullanılabilir mi kontrol eder
+ */
+function isGeminiAvailable() {
+  return CONFIG.GEMINI_ENABLED && CONFIG.GEMINI_API_KEY && CONFIG.GEMINI_API_KEY.length > 10;
+}
+
+/**
+ * Gemini API'ye istek gönderir
+ * @param {string} prompt - Gönderilecek prompt
+ * @param {number} maxTokens - Maksimum yanıt token sayısı (default: 1024)
+ * @returns {string|null} - Gemini yanıtı veya hata durumunda null
+ */
+function callGemini(prompt, maxTokens) {
+  if (!isGeminiAvailable()) return null;
+
+  var maxT = maxTokens || 1024;
+  var url = "https://generativelanguage.googleapis.com/v1beta/models/"
+    + CONFIG.GEMINI_MODEL + ":generateContent?key=" + CONFIG.GEMINI_API_KEY;
+
+  var payload = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      maxOutputTokens: maxT,
+      temperature: 0.1  // Düşük sıcaklık = tutarlı, deterministik yanıt
+    }
+  };
+
+  try {
+    var response = UrlFetchApp.fetch(url, {
+      method: "post",
+      contentType: "application/json",
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+
+    var code = response.getResponseCode();
+    if (code !== 200) {
+      Logger.log("Gemini API hata (" + code + "): " + response.getContentText().substring(0, 200));
+      return null;
+    }
+
+    var json = JSON.parse(response.getContentText());
+    if (json.candidates && json.candidates[0] && json.candidates[0].content) {
+      return json.candidates[0].content.parts[0].text;
+    }
+    return null;
+  } catch (e) {
+    Logger.log("Gemini API bağlantı hatası: " + e.message);
+    return null;
+  }
+}
+
+/**
+ * Gemini ile fatura içeriğini analiz eder (PDF metin veya mail body)
+ * JSON formatında yapılandırılmış veri döner
+ *
+ * @param {string} text - Analiz edilecek metin (PDF içeriği veya mail body)
+ * @param {string} from - Gönderen email adresi
+ * @param {string} subject - Mail konusu
+ * @returns {object|null} - {isInvoice, vendor, amount, currency, invoiceNo, confidence, summary}
+ */
+function analyzeWithGemini(text, from, subject) {
+  if (!isGeminiAvailable()) return null;
+
+  // Metni 4000 karakterle sınırla (token tasarrufu)
+  var truncatedText = (text || "").substring(0, 4000);
+
+  var prompt = `Sen bir fatura analiz asistanısın. Aşağıdaki metin bir email veya PDF'den alınmıştır.
+Bu metnin bir FATURA olup olmadığını analiz et ve bilgileri çıkar.
+
+Gönderen: ${from || "bilinmiyor"}
+Konu: ${subject || "bilinmiyor"}
+
+--- METİN BAŞI ---
+${truncatedText}
+--- METİN SONU ---
+
+SADECE aşağıdaki JSON formatında yanıt ver, başka hiçbir şey yazma:
+{
+  "isInvoice": true/false,
+  "confidence": 0-100,
+  "vendor": "vendor/şirket adı veya boş string",
+  "amount": "sadece rakam, nokta ile ondalık (örn: 1234.56) veya boş string",
+  "currency": "EUR/USD/TRY/GBP/AED/CHF veya boş string",
+  "invoiceNo": "fatura numarası veya boş string",
+  "dueDate": "vade tarihi YYYY-MM-DD veya boş string",
+  "summary": "tek cümle açıklama (Türkçe)"
+}
+
+ÖNEMLİ KURALLAR:
+- Sadece kesin olduğun bilgileri doldur, emin değilsen boş string bırak
+- "Payment Made", "Payment Receipt" gibi ödeme makbuzları fatura DEĞİLDİR
+- Newsletter, pazarlama, davet mailleri fatura DEĞİLDİR
+- Tutarı Avrupa formatından (1.234,56) US formatına (1234.56) çevir
+- confidence: 90+ = kesin fatura, 60-89 = muhtemelen, 0-59 = fatura değil`;
+
+  var response = callGemini(prompt, 512);
+  if (!response) return null;
+
+  try {
+    // Gemini yanıtından JSON'u çıkar (bazen markdown code block içinde gelir)
+    var jsonStr = response;
+    var jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) jsonStr = jsonMatch[0];
+
+    var parsed = JSON.parse(jsonStr);
+
+    return {
+      isInvoice: parsed.isInvoice === true,
+      vendor: String(parsed.vendor || "").trim(),
+      amount: String(parsed.amount || "").trim(),
+      currency: String(parsed.currency || "").toUpperCase().trim(),
+      invoiceNo: String(parsed.invoiceNo || "").trim(),
+      dueDate: String(parsed.dueDate || "").trim(),
+      confidence: parseInt(parsed.confidence) || 0,
+      summary: String(parsed.summary || "").trim(),
+      source: "gemini"
+    };
+  } catch (e) {
+    Logger.log("Gemini JSON parse hatası: " + e.message + " | Yanıt: " + (response || "").substring(0, 200));
+    return null;
+  }
+}
+
 // ==================== ANA FONKSİYONLAR ====================
 /**
  * Ana tarama fonksiyonu — her gün otomatik çalışır
@@ -119,7 +257,7 @@ function dailyScan(customDays) {
   const ss = getOrCreateSpreadsheet();
   const startTime = new Date();
 
-  log(ss, "🔍 Tarama başladı (" + scanDays + " gün)...");
+  log(ss, "🔍 Tarama başladı (" + scanDays + " gün)... " + (isGeminiAvailable() ? "🤖 Gemini AI aktif" : "📝 Klasik mod"));
 
   try {
     // 0. Drive'daki Excel'den bilinen faturaları senkronize et
@@ -309,10 +447,72 @@ function scanGmail(days) {
         const score = calculateInvoiceScore(subject, body, from, pdfResults);
 
         if (score >= 2) {
-          const vendorGuess = guessVendor(from, subject, body, pdfResults);
-          const amountGuess = extractAmount(body, pdfResults);
-          const currencyGuess = extractCurrency(body, pdfResults);
-          const invoiceNoGuess = extractInvoiceNumber(subject, body, pdfResults);
+          // === KLASİK ANALİZ (her zaman çalışır) ===
+          var vendorGuess = guessVendor(from, subject, body, pdfResults);
+          var amountGuess = extractAmount(body, pdfResults);
+          var currencyGuess = extractCurrency(body, pdfResults);
+          var invoiceNoGuess = extractInvoiceNumber(subject, body, pdfResults);
+
+          // === GEMİNİ AI İLE ZENGİNLEŞTİRME ===
+          // Önce PDF'deki Gemini sonucunu kontrol et
+          var bestGemini = null;
+          for (var gi = 0; gi < pdfResults.length; gi++) {
+            if (pdfResults[gi].gemini && pdfResults[gi].gemini.confidence > 0) {
+              if (!bestGemini || pdfResults[gi].gemini.confidence > bestGemini.confidence) {
+                bestGemini = pdfResults[gi].gemini;
+              }
+            }
+          }
+
+          // PDF'de Gemini yoksa ve mail body yeterince uzunsa, body'yi analiz et
+          if (!bestGemini && isGeminiAvailable() && body.length > 100) {
+            try {
+              bestGemini = analyzeWithGemini(body.substring(0, 4000), from, subject);
+            } catch (gemErr) {
+              Logger.log("Gemini mail analiz hatası: " + gemErr.message);
+            }
+          }
+
+          // Gemini sonuçlarıyla klasik sonuçları birleştir
+          // Kural: Gemini yüksek güvenle sonuç verdiyse, klasik sonucu override et
+          // Klasik sonuç boşsa, Gemini'den al
+          if (bestGemini && bestGemini.confidence >= 60) {
+            // Vendor: Gemini'nin tahmini bilinen vendor listesinde mi?
+            if (bestGemini.vendor) {
+              var geminiVendorKnown = false;
+              for (var kv = 0; kv < ALL_KNOWN_VENDORS.length; kv++) {
+                if (vendorMatch(bestGemini.vendor, ALL_KNOWN_VENDORS[kv])) {
+                  vendorGuess = ALL_KNOWN_VENDORS[kv];  // Bilinen ismi kullan
+                  geminiVendorKnown = true;
+                  break;
+                }
+              }
+              // Bilinen değilse ve klasik "Bilinmeyen" ise, Gemini'nin tahminini kullan
+              if (!geminiVendorKnown && (vendorGuess === "Bilinmeyen" || !vendorGuess)) {
+                vendorGuess = bestGemini.vendor;
+              }
+            }
+
+            // Tutar: Klasik boşsa Gemini'den al
+            if (!amountGuess && bestGemini.amount) {
+              amountGuess = bestGemini.amount;
+            }
+
+            // Para birimi: Klasik boşsa Gemini'den al
+            if (!currencyGuess && bestGemini.currency) {
+              currencyGuess = bestGemini.currency;
+            }
+
+            // Fatura numarası: Klasik boşsa Gemini'den al
+            if (!invoiceNoGuess && bestGemini.invoiceNo) {
+              invoiceNoGuess = bestGemini.invoiceNo;
+            }
+
+            // Gemini fatura değil diyorsa ve skor düşükse, atla
+            if (!bestGemini.isInvoice && bestGemini.confidence >= 80 && score < 5) {
+              continue;
+            }
+          }
 
           // Yeni vendor kontrolü
           const isNewVendor = !isKnownVendor(vendorGuess);
@@ -329,6 +529,12 @@ function scanGmail(days) {
           // Zaten ödenmiş faturaları atla (Zoho "Payment Made" vs.)
           if (isAlreadyPaid) continue;
 
+          // AI özet bilgisini pdfDetails'a ekle
+          var pdfDetailsStr = pdfResults.map(p => p.summary).join(" | ");
+          if (bestGemini && bestGemini.summary) {
+            pdfDetailsStr += (pdfDetailsStr ? " | " : "") + "🤖 " + bestGemini.summary;
+          }
+
           invoices.push({
             date: msg.getDate(),
             from: from,
@@ -342,7 +548,7 @@ function scanGmail(days) {
             invoiceNo: normalizeInvoiceNo(invoiceNoGuess),
             hasPdf: pdfResults.length > 0,
             pdfIsInvoice: pdfResults.some(p => p.isInvoice),
-            pdfDetails: pdfResults.map(p => p.summary).join(" | "),
+            pdfDetails: pdfDetailsStr,
             isNewVendor: isNewVendor,
             isForwarded: isFromImportantForwarder,
             permalink: `https://mail.google.com/mail/u/0/#inbox/${thread.getId()}`
@@ -447,6 +653,7 @@ function analyzePdf(attachment) {
 
     var lowerText = text.toLowerCase();
 
+    // === KLASIK KEYWORD ANALİZİ (her zaman çalışır, fallback) ===
     var invoiceIndicators = [
       "invoice", "fatura", "rechnung", "facture",
       "tax invoice", "total", "subtotal", "vat", "kdv",
@@ -460,14 +667,39 @@ function analyzePdf(attachment) {
     for (var i = 0; i < invoiceIndicators.length; i++) {
       if (lowerText.indexOf(invoiceIndicators[i]) >= 0) matchCount++;
     }
-    var isInvoice = matchCount >= 3;
+    var isInvoiceKeyword = matchCount >= 3;
+
+    // === GEMİNİ AI ANALİZİ (varsa) ===
+    var geminiResult = null;
+    if (isGeminiAvailable()) {
+      try {
+        geminiResult = analyzeWithGemini(text.substring(0, 4000), "", fileName);
+      } catch (gemErr) {
+        Logger.log("Gemini PDF analiz hatası: " + gemErr.message);
+      }
+    }
+
+    // Sonuçları birleştir: Gemini varsa ona güven, yoksa klasik yöntem
+    var isInvoice, summaryText;
+    if (geminiResult && geminiResult.confidence > 0) {
+      // Gemini başarılı — her iki sonucu birleştir
+      isInvoice = geminiResult.confidence >= 60 ? true : (geminiResult.confidence >= 40 ? isInvoiceKeyword : false);
+      summaryText = fileName + ": " + (isInvoice ? "✅ FATURA" : "❓ Belirsiz")
+        + " (AI:" + geminiResult.confidence + "%, kw:" + matchCount + ")"
+        + (geminiResult.summary ? " — " + geminiResult.summary : "");
+    } else {
+      // Gemini yok veya hata — klasik yöntem
+      isInvoice = isInvoiceKeyword;
+      summaryText = fileName + ": " + (isInvoice ? "✅ FATURA" : "❓ Belirsiz") + " (" + matchCount + " eşleşme)";
+    }
 
     return {
       isInvoice: isInvoice,
       failed: false,
       text: text.substring(0, 3000),
-      summary: fileName + ": " + (isInvoice ? "✅ FATURA" : "❓ Belirsiz") + " (" + matchCount + " eşleşme)",
-      matchCount: matchCount
+      summary: summaryText,
+      matchCount: matchCount,
+      gemini: geminiResult  // AI sonucu — scanGmail'de kullanılacak
     };
 
   } catch (e) {
@@ -964,7 +1196,7 @@ function sendNotificationEmail(ss, summary) {
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
       <div style="background:#1F4E79;color:white;padding:16px 20px;border-radius:8px 8px 0 0;">
         <h2 style="margin:0;font-size:18px;">🧾 212 Invoice Tracker — Günlük Özet</h2>
-        <p style="margin:4px 0 0;opacity:0.8;font-size:13px;">${today}</p>
+        <p style="margin:4px 0 0;opacity:0.8;font-size:13px;">${today} ${isGeminiAvailable() ? "| 🤖 Gemini AI aktif" : ""}</p>
       </div>
 
       <div style="border:1px solid #ddd;border-top:none;padding:20px;border-radius:0 0 8px 8px;">
@@ -1403,6 +1635,7 @@ function setupTriggers() {
   Logger.log("• Haftalık derin tarama: Her pazartesi 09:00");
   Logger.log("• Bildirim maili: Her tarama sonrası");
   Logger.log("⚠️ CONFIG bölümünde APPROVAL_EMAIL_TO ve APPROVAL_EMAIL_SIGNATURE güncelle");
+  Logger.log("🤖 Gemini AI: " + (isGeminiAvailable() ? "✅ AKTİF" : "❌ API key girilmemiş (opsiyonel)"));
   Logger.log("İlk tarama için weeklyScan fonksiyonunu çalıştır.");
 }
 function weeklyScan() {
@@ -1417,7 +1650,7 @@ function manualScan() {
   }
 }
 function onOpen() {
-  SpreadsheetApp.getUi()
+  var menu = SpreadsheetApp.getUi()
     .createMenu("🧾 Fatura Tracker")
     .addItem("🔍 Şimdi Tara", "manualScan")
     .addItem("📧 Onay Maili Oluştur (seçili satırlar)", "createApprovalDraft")
@@ -1425,7 +1658,9 @@ function onOpen() {
     .addItem("📋 Bilinen Faturaları Import Et", "importKnownInvoices")
     .addItem("📥 Excel'den Senkronize Et", "syncFromDriveExcel")
     .addItem("⚙️ Tetikleyicileri Kur", "setupTriggers")
-    .addToUi();
+    .addSeparator()
+    .addItem("🤖 Gemini AI Test", "testGemini");
+  menu.addToUi();
 }
 function importKnownInvoices() {
   try {
@@ -1438,5 +1673,67 @@ function importKnownInvoices() {
     );
   } catch(e) {
     Logger.log("📋 Bilinen Faturalar sekmesine mevcut fatura numaralarını yapıştırın.");
+  }
+}
+// ==================== GEMİNİ AI TEST ====================
+/**
+ * Gemini API bağlantısını test eder
+ * Menü → 🤖 Gemini AI Test ile çalıştır
+ */
+function testGemini() {
+  var msg;
+
+  if (!CONFIG.GEMINI_API_KEY || CONFIG.GEMINI_API_KEY.length < 10) {
+    msg = "❌ Gemini API Key girilmemiş!\n\n" +
+      "1. https://aistudio.google.com/apikey adresine git\n" +
+      "2. 'Create API Key' tıkla (ÜCRETSİZ)\n" +
+      "3. Key'i kopyala\n" +
+      "4. CONFIG.GEMINI_API_KEY alanına yapıştır\n\n" +
+      "Not: Gemini olmadan da çalışır, sadece keyword analizi kullanır.";
+  } else {
+    // Test isteği gönder
+    var testResult = callGemini(
+      "Bu bir test mesajıdır. Sadece JSON olarak yanıt ver: {\"status\": \"ok\", \"message\": \"Gemini bağlantısı başarılı\"}",
+      128
+    );
+
+    if (testResult) {
+      // Gerçek fatura testi
+      var invoiceTest = analyzeWithGemini(
+        "INVOICE\nInvoice No: INV-2026-0042\nFrom: Hawksford Corporate Services\nDate: 2026-03-15\nService: Fund Administration Q1 2026\nAmount Due: EUR 12,500.00\nBank: IBAN LU12 3456 7890 1234 5678\nDue Date: 2026-04-15",
+        "billing@hawksford.com",
+        "Invoice INV-2026-0042 - Fund Administration"
+      );
+
+      msg = "✅ Gemini AI Bağlantısı Başarılı!\n\n" +
+        "Model: " + CONFIG.GEMINI_MODEL + "\n" +
+        "Durum: Aktif ve çalışıyor\n\n";
+
+      if (invoiceTest) {
+        msg += "📋 Test Fatura Analizi:\n" +
+          "• Fatura mı: " + (invoiceTest.isInvoice ? "Evet ✅" : "Hayır ❌") + "\n" +
+          "• Güven: %" + invoiceTest.confidence + "\n" +
+          "• Vendor: " + (invoiceTest.vendor || "—") + "\n" +
+          "• Tutar: " + (invoiceTest.amount || "—") + " " + (invoiceTest.currency || "") + "\n" +
+          "• Fatura No: " + (invoiceTest.invoiceNo || "—") + "\n" +
+          "• Özet: " + (invoiceTest.summary || "—") + "\n\n" +
+          "🎉 Gemini fatura analizine hazır!";
+      } else {
+        msg += "⚠️ Bağlantı var ama fatura analizi çalışmadı. Log'ları kontrol edin.";
+      }
+    } else {
+      msg = "❌ Gemini API yanıt vermedi!\n\n" +
+        "Olası sebepler:\n" +
+        "• API key yanlış olabilir\n" +
+        "• Ücretsiz kota dolmuş olabilir (15 istek/dk)\n" +
+        "• Ağ sorunu olabilir\n\n" +
+        "Execution Log'u kontrol edin (Ctrl+Enter sonrası).";
+    }
+  }
+
+  try {
+    SpreadsheetApp.getUi().alert("🤖 Gemini AI Test", msg, SpreadsheetApp.getUi().ButtonSet.OK);
+  } catch (e) {
+    Logger.log(msg);
   }
 }
