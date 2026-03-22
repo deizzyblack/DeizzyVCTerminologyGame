@@ -55,7 +55,6 @@ const CONFIG = {
   EXCLUDE_SENDERS: [
     "dogukan@212.vc",      // Ben — benim gönderdiğim onay mailleri fatura değil
     "deniz",               // Deniz — fatura ile ilgisi yok
-    "selma"                // Selma — expense report gönderiyor, fatura değil
   ],
 
   // SUBJECT EXCLUDE — bu kelimeler subject'te geçiyorsa atla
@@ -100,7 +99,7 @@ const CONFIG = {
   // API Key: https://aistudio.google.com/apikey adresinden al (ÜCRETSİZ)
   // Model: gemini-2.0-flash — hızlı, ücretsiz, fatura analizi için ideal
   // Limitler: 15 istek/dakika, 1M token/gün (fatura tarama için fazlasıyla yeterli)
-  GEMINI_API_KEY: "",  // ← BURAYA API KEY'İNİ YAPIŞTIR
+  GEMINI_API_KEY: "AIzaSyD9m8-n5DQCVaw1qDdKhcWuUHChfpy9fKo",  // ← BURAYA API KEY'İNİ YAPIŞTIR
   GEMINI_MODEL: "gemini-2.0-flash",
   GEMINI_ENABLED: true  // false yaparak AI'yi devre dışı bırakabilirsin
 };
