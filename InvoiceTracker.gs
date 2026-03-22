@@ -350,6 +350,22 @@ function scanGmail(days) {
   var pdfProcessedCount = 0;
   var PDF_LIMIT = 30; // Maksimum PDF işleme sayısı (Drive API kota koruması)
 
+  // === DAHA ÖNCE TARANAN MAİLLERİ ATLA ===
+  // İlk çalışma: tüm mailleri tarar, ID'lerini kaydeder
+  // Sonraki çalışmalar: sadece yeni mailleri tarar → Gemini kotası korunur
+  var props = PropertiesService.getScriptProperties();
+  var processedIdsRaw = props.getProperty("PROCESSED_MSG_IDS") || "";
+  var processedIds = new Set(processedIdsRaw ? processedIdsRaw.split(",").filter(function(id) { return id.length > 0; }) : []);
+  var isFirstRun = processedIds.size === 0;
+  var newProcessedIds = [];
+  var skippedCount = 0;
+
+  if (isFirstRun) {
+    Logger.log("🔵 İLK ÇALIŞMA — tüm mailler taranacak, Gemini ilk seferde sınırlı kullanılacak.");
+  } else {
+    Logger.log("🟢 DEVAM — " + processedIds.size + " mail zaten taranmış, sadece yeniler işlenecek.");
+  }
+
   const afterDate = new Date();
   afterDate.setDate(afterDate.getDate() - days);
   const dateStr = Utilities.formatDate(afterDate, Session.getScriptTimeZone(), "yyyy/MM/dd");
@@ -381,6 +397,13 @@ function scanGmail(days) {
         if (msg.getDate() < afterDate) continue;
 
         seenMessageIds.add(msgId);
+
+        // Daha önce işlenmiş maili atla
+        if (processedIds.has(msgId)) {
+          skippedCount++;
+          continue;
+        }
+        newProcessedIds.push(msgId);
 
         const subject = msg.getSubject() || "";
         const from = msg.getFrom() || "";
@@ -594,6 +617,22 @@ function scanGmail(days) {
       }
     }
   }
+
+  // İşlenen mail ID'lerini kaydet (sonraki taramada atlamak için)
+  if (newProcessedIds.length > 0) {
+    // Mevcut ID'lere yenilerini ekle
+    var allIds = processedIdsRaw ? processedIdsRaw.split(",").filter(function(id) { return id.length > 0; }) : [];
+    allIds = allIds.concat(newProcessedIds);
+
+    // Son 2000 ID'yi tut (eski olanları at — bellek tasarrufu)
+    if (allIds.length > 2000) {
+      allIds = allIds.slice(allIds.length - 2000);
+    }
+
+    props.setProperty("PROCESSED_MSG_IDS", allIds.join(","));
+  }
+
+  Logger.log("📊 Tarama özeti: " + newProcessedIds.length + " yeni mail işlendi, " + skippedCount + " mail atlandı (zaten taranmış)");
 
   invoices.sort((a, b) => b.score - a.score);
   return { invoices, unreadablePdfs, newVendors };
@@ -1699,7 +1738,8 @@ function onOpen() {
     .addItem("📥 Excel'den Senkronize Et", "syncFromDriveExcel")
     .addItem("⚙️ Tetikleyicileri Kur", "setupTriggers")
     .addSeparator()
-    .addItem("🤖 Gemini AI Test", "testGemini");
+    .addItem("🤖 Gemini AI Test", "testGemini")
+    .addItem("🔄 Tarama Geçmişini Sıfırla", "resetScanCache");
   menu.addToUi();
 }
 function importKnownInvoices() {
@@ -1713,6 +1753,28 @@ function importKnownInvoices() {
     );
   } catch(e) {
     Logger.log("📋 Bilinen Faturalar sekmesine mevcut fatura numaralarını yapıştırın.");
+  }
+}
+/**
+ * Tarama geçmişini sıfırlar — tüm mailler tekrar taranır
+ * İlk kurulumda veya sorun olduğunda kullan
+ */
+function resetScanCache() {
+  var props = PropertiesService.getScriptProperties();
+  props.deleteProperty("PROCESSED_MSG_IDS");
+  props.deleteProperty("LAST_EXCEL_SYNC_DATE");
+  props.deleteProperty("LAST_EXCEL_SYNC_FILE");
+
+  try {
+    SpreadsheetApp.getUi().alert(
+      "Tarama Geçmişi Sıfırlandı 🔄",
+      "Bir sonraki taramada tüm mailler sıfırdan taranacak.\n\n" +
+      "⚠️ İlk taramada Gemini AI sınırlı kullanılacak (kota koruması).\n" +
+      "Sonraki günlük taramalarda sadece yeni mailler işlenecek.",
+      SpreadsheetApp.getUi().ButtonSet.OK
+    );
+  } catch (e) {
+    Logger.log("Tarama geçmişi sıfırlandı.");
   }
 }
 // ==================== GEMİNİ AI TEST ====================
